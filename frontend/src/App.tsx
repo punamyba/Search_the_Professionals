@@ -9,6 +9,7 @@ import NotFound from './features/auth/notfound/notfound'
 import AuthGuard from './shared/guards/authGuard'
 import RoleGuard from './shared/guards/roleGuard' 
 import Profile from './features/auth/profile/profile'
+import axiosInstance from './shared/config/axiosinstance'
 
 function App() {
 
@@ -49,3 +50,5 @@ function App() {
 }
 
 export default App
+
+

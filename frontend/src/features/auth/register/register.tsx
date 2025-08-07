@@ -1,15 +1,27 @@
 import { useState } from 'react';
 import './register.css';
 import { useNavigate } from 'react-router-dom';
-import { registerApi } from '../../../shared/config/api';
+import { type RegisterFormData, registerApi } from '../../../shared/config/api';
 
 function Register() {
-  const [form, setFormData] = useState({username: '', email: '', password: ''});
+  const [form, setFormData] = useState<RegisterFormData>({
+    username: '',
+    email: '',
+    password: '',
+    phone: '',
+    address: '',
+    jobCategory: '',
+    interests: '',
+    bio: ''
+  });
+
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -18,35 +30,36 @@ function Register() {
     e.preventDefault();
     setLoading(true);
     setError('');
+
     try {
-      console.log('Register Data:', form);
-      await registerApi(form);
+      // Clean the payload by removing empty strings (optional fields)
+      const payload = Object.fromEntries(
+        Object.entries(form).filter(([_, value]) => value.trim() !== '')
+      ) as RegisterFormData;
+
+      console.log('Register Data:', payload);
+      await registerApi(payload);
       alert('Registration successful! Please login.');
       navigate('/');
     } catch (err) {
       const errorResponse = (err as any)?.response;
-      console.error('Register Error Response:', errorResponse);
-      console.error('Backend message:', errorResponse?.data);
-    
+      console.error('Register Error Response:', errorResponse?.data || errorResponse);
       setError(errorResponse?.data?.message || 'Registration failed');
-    }
-    finally {
-      
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="register-wrapper">
       <form className="register-card" onSubmit={handleSubmit}>
-        <h2 style={{ textAlign: 'center', color: '#31858b', marginBottom: '1.5rem', fontSize: '2rem' }}>
-          Register
-        </h2>
+        <h2 className="register-title">Register</h2>
 
         <div className="register-field">
           <label htmlFor="username">Username:</label>
           <input
-            id="username"
             type="text"
+            id="username"
             name="username"
             value={form.username}
             onChange={handleChange}
@@ -57,8 +70,8 @@ function Register() {
         <div className="register-field">
           <label htmlFor="email">Email:</label>
           <input
-            id="email"
             type="email"
+            id="email"
             name="email"
             value={form.email}
             onChange={handleChange}
@@ -69,8 +82,8 @@ function Register() {
         <div className="register-field">
           <label htmlFor="password">Password:</label>
           <input
-            id="password"
             type="password"
+            id="password"
             name="password"
             value={form.password}
             onChange={handleChange}
@@ -78,12 +91,75 @@ function Register() {
           />
         </div>
 
-        <button className="register-btn" type="submit">Register</button>
+        <div className="register-field">
+          <label htmlFor="phone">Phone Number:</label>
+          <input
+            type="text"
+            id="phone"
+            name="phone"
+            value={form.phone}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className="register-field">
+          <label htmlFor="address">Address:</label>
+          <input
+            type="text"
+            id="address"
+            name="address"
+            value={form.address}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className="register-field">
+          <label htmlFor="jobCategory">Job Category:</label>
+          <select
+            name="jobCategory"
+            id="jobCategory"
+            value={form.jobCategory}
+            onChange={handleChange}
+          >
+            <option value="">Select a category</option>
+            <option value="developer">Developer</option>
+            <option value="designer">Designer</option>
+            <option value="manager">Manager</option>
+            <option value="marketing">Marketing</option>
+          </select>
+        </div>
+
+        <div className="register-field">
+          <label htmlFor="interests">Interests (comma separated):</label>
+          <input
+            type="text"
+            id="interests"
+            name="interests"
+            value={form.interests}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className="register-field">
+          <label htmlFor="bio">Bio:</label>
+          <textarea
+            id="bio"
+            name="bio"
+            value={form.bio}
+            onChange={handleChange}
+            rows={3}
+          />
+        </div>
+
+        <button className="register-btn" type="submit" disabled={loading}>
+          {loading ? 'Registering...' : 'Register'}
+        </button>
+
         {error && <div className="register-error">{error}</div>}
-        
-        <h4 style={{ textAlign: 'center', fontWeight: 'normal' }}>
+
+        <p className="register-login-link">
           Already have an account? <a href="/">Login</a>
-        </h4>
+        </p>
       </form>
     </div>
   );

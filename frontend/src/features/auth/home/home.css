@@ -113,10 +113,26 @@
   opacity: 0.9;
 }
 
+.retry-btn {
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.retry-btn:hover {
+  background: #ff5252;
+  transform: translateY(-2px);
+}
+
 /* User Grid */
 .user-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 25px;
   max-width: 1200px;
   margin: 0 auto;
@@ -133,6 +149,10 @@
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .user-card::before {
@@ -150,17 +170,53 @@
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
 }
 
+/* User Avatar */
+.user-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #82effd, #bc91e7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 15px;
+  font-size: 1.5rem;
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
 .user-card h3 {
   font-size: 1.3rem;
   color: #333;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   font-weight: 600;
 }
 
-.user-card p {
-  font-size: 1rem;
+.user-email {
+  font-size: 0.9rem;
   color: #666;
+  margin-bottom: 12px;
+}
+
+.job-category {
+  font-size: 0.9rem;
+  color: #16b7cd;
+  font-weight: 600;
   margin-bottom: 8px;
+}
+
+.user-address {
+  font-size: 0.85rem;
+  color: #777;
+  margin-bottom: 8px;
+}
+
+.user-interests {
+  font-size: 0.85rem;
+  color: #888;
+  margin-bottom: 15px;
+  font-style: italic;
 }
 
 .view-profile-btn {
@@ -172,13 +228,39 @@
   cursor: pointer;
   font-size: 0.9rem;
   font-weight: 500;
-  margin-top: 15px;
   transition: all 0.3s ease;
+  margin-top: auto;
 }
 
 .view-profile-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+/* Error/Loading States */
+.error-message {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  color: white;
+}
+
+.error-message button {
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all 0.3s ease;
+}
+
+.error-message button:hover {
+  background: #ff5252;
 }
 
 /* Loading / No Results */
@@ -219,5 +301,9 @@
 
   .features {
     grid-template-columns: 1fr;
+  }
+
+  .user-card {
+    min-height: auto;
   }
 }

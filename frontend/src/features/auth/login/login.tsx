@@ -31,7 +31,7 @@ export default function Login() {
   return (
     <div className="login-wrapper">
       <form className="login-card" onSubmit={handleSubmit}>
-        <h2 style={{ textAlign: 'center', color: '#a352dd', marginBottom: '1.5rem', fontSize: '2rem' }}>
+        <h2 style={{ textAlign: 'center', color: '#1d8cee', marginBottom: '1.5rem', fontSize: '2rem' }}>
           Login
         </h2>
 

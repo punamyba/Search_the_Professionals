@@ -16,9 +16,12 @@
   .navbar-left .logo {
     font-size: 22px;
     font-weight: bold;
-    color: #c59ef9;
+    
   }
   
+  .logo{
+    color: rgb(49, 162, 237);
+  }
   .navbar-center {
     flex: 1;
     display: flex;

@@ -1,18 +1,31 @@
+import axios from 'axios';
 
-import axios from "axios";
-import axiosInstance from "./axiosinstance";
+const axiosInstance = axios.create({
+  baseURL: 'http://localhost:3000',  // Adjust to your backend URL/port
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
-
-
-export const login = (data: {username: string, password: string }) =>{
-    return axios.post('http://localhost:3000/api/auth/login',data)
-} 
-
-export const registerApi = (data: {  username: string, email: string, password: string}) =>{
-    return axiosInstance.post('/auth/register', data);
+export type RegisterFormData = {
+  username: string;
+  email: string;
+  password: string;
+  phone?: string;
+  address?: string;
+  jobCategory?: string;
+  interests?: string;
+  bio?: string;
 };
 
-export const getUserListApi = () =>{
-    return axiosInstance.get('/user/list');
+export const registerApi = (data: RegisterFormData) => {
+  return axiosInstance.post('/api/auth/register', data);
 };
 
+export const login = (data: { username: string; password: string }) => {
+  return axiosInstance.post('/api/auth/login', data);
+};
+
+export const getUserListApi = () => {
+  return axiosInstance.get('/user/list');
+};

@@ -7,6 +7,11 @@ type User = {
   _id: string;
   username: string;
   email: string;
+  phone?: string | null;
+  address?: string | null;
+  jobCategory?: string | null;
+  interests?: string | null;
+  bio?: string | null;
 }
 
 export default function Home() {
@@ -96,7 +101,6 @@ export default function Home() {
     }
   };
 
-  // यो नयाँ function हो - View Profile को लागि
   const goToProfile = (userId: string) => {
     navigate(`/profile/${userId}`);
   };
@@ -170,9 +174,30 @@ export default function Home() {
 
           {!loading && !error && users.map(user => (
             <div key={user._id} className="user-card">
+              <div className="user-avatar">
+                {user.username.charAt(0).toUpperCase()}
+              </div>
+              
               <h3>{user.username}</h3>
-              <p>{user.email}</p>
-              <p>ING Tech</p>
+              <p className="user-email">{user.email}</p>
+              
+              {user.jobCategory && (
+                <p className="job-category">
+                  💼 {user.jobCategory.charAt(0).toUpperCase() + user.jobCategory.slice(1)}
+                </p>
+              )}
+              
+              {user.address && (
+                <p className="user-address">📍 {user.address}</p>
+              )}
+              
+              {user.interests && typeof user.interests === 'string' && (
+                <p className="user-interests">
+                  🎯 {user.interests.split(',').slice(0, 2).join(', ')}
+                  {user.interests.split(',').length > 2 && '...'}
+                </p>
+              )}
+              
               <button 
                 className="view-profile-btn"
                 onClick={() => goToProfile(user._id)}

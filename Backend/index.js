@@ -3,11 +3,10 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import User from './models/user.model.js';
-
-// Fixed imports to match your actual file names
 import authRoutes from './routes/auth.route.js';
 import userRoutes from './routes/user.route.js';
 import experienceRoutes from './routes/experience.route.js';
+import educationRoutes from './routes/education.route.js';
 import { authMiddleware } from './middleware/auth.middleware.js';
 
 // Load environment variables
@@ -29,6 +28,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/user/experience', experienceRoutes);
+app.use('/api/user/education', educationRoutes); // Add this line
 
 // Test auth route to verify JWT token is working
 app.get('/api/user/test-auth', authMiddleware, (req, res) => {

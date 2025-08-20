@@ -15,7 +15,20 @@ export async function getUserExperiences(req, res) {
 
         res.status(200).json({
             message: "Experiences retrieved successfully",
-            experiences
+            experiences: experiences.map(exp => ({
+                id: exp._id,
+                title: exp.title,
+                company: exp.company,
+                employmentType: exp.employmentType,
+                startMonth: exp.startMonth,       // Change gareko
+                startYear: exp.startYear,         // Change gareko
+                endMonth: exp.endMonth || '',     // Change gareko
+                endYear: exp.endYear || '',       // Change gareko
+                location: exp.location,
+                locationType: exp.locationType,
+                description: exp.description || '',
+                isCurrentRole: exp.isCurrentRole
+            }))
         });
     } catch (error) {
         console.error('Get user experiences error:', error);

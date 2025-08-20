@@ -10,6 +10,7 @@ import AuthGuard from './shared/guards/authGuard'
 import RoleGuard from './shared/guards/roleGuard' 
 import Profile from './features/auth/profile/profile'
 import axiosInstance from './shared/config/axiosinstance'
+import ContactUs from './features/auth/Contact/contact'
 
 function App() {
 
@@ -38,7 +39,11 @@ function App() {
          <Explore/>
         </AuthGuard>
       }/>
-
+      <Route path='/contact' element={
+        <AuthGuard>
+         <ContactUs/>
+        </AuthGuard>
+      }/>
 
       <Route path="/profile/:userId" element={<Profile />} />
 

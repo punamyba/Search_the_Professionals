@@ -1,19 +1,21 @@
 /* Contact Wrapper & Layout */
 .contact-wrapper {
     min-height: 100vh;
+    background-color: #cfefff;
     padding: 20px 0;
-  }
+}
   
   
   
-  .contact-content {
+.contact-content {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
-  }
+}
   
-  /* Hero Section */
-  .contact-hero {
+
+/* Hero Section */
+.contact-hero {
     text-align: center;
     color: #2d3748;
     margin-bottom: 40px;
@@ -25,10 +27,10 @@
     border: 1px solid rgba(255, 255, 255, 0.2);
     position: relative;
     overflow: hidden;
-  }
+}
   
-  /* Animated circles for hero section */
-  .contact-hero::before {
+/* Animated circles for hero section */
+.contact-hero::before {
     content: '';
     position: absolute;
     top: 20%;
@@ -46,9 +48,9 @@
     animation: floatCirclesContact 8s linear infinite;
     pointer-events: none;
     opacity: 0.6;
-  }
+}
   
-  @keyframes floatCirclesContact {
+@keyframes floatCirclesContact {
     0% {
       transform: translateY(0px) rotate(0deg);
       opacity: 0.6;
@@ -61,9 +63,9 @@
       transform: translateY(-80px) rotate(360deg);
       opacity: 0.6;
     }
-  }
+}
   
-  .contact-hero h1 {
+.contact-hero h1 {
     font-size: 2.2rem;
     margin-bottom: 15px;
     font-weight: 700;
@@ -74,9 +76,9 @@
     line-height: 1.2;
     position: relative;
     z-index: 2;
-  }
+}
   
-  .contact-hero p {
+.contact-hero p {
     font-size: 1.1rem;
     color: #4a5568;
     opacity: 0.9;
@@ -85,92 +87,92 @@
     line-height: 1.5;
     position: relative;
     z-index: 2;
-  }
+}
   
-  /* Main Contact Layout */
-  .contact-main {
+/* Main Contact Layout */
+.contact-main {
     display: grid;
     grid-template-columns: 1fr 350px;
     gap: 30px;
     margin-bottom: 40px;
-  }
+}
   
-  /* Contact Form Container */
-  .contact-form-container {
+/* Contact Form Container */
+.contact-form-container {
     background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(10px);
     padding: 35px;
     border-radius: 18px;
     box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.2);
-  }
+}
   
-  .form-header {
+.form-header {
     margin-bottom: 25px;
-  }
+}
   
-  .form-header h2 {
+.form-header h2 {
     font-size: 1.6rem;
     color: #2d3748;
     margin-bottom: 8px;
     font-weight: 600;
-  }
+}
   
-  .form-header p {
+.form-header p {
     color: #4a5568;
     font-size: 0.95rem;
     line-height: 1.4;
-  }
+}
   
-  /* Success & Error Messages */
-  .success-message,
-  .error-message {
+/* Success & Error Messages */
+.success-message,
+.error-message {
     padding: 12px 18px;
     border-radius: 8px;
     margin-bottom: 18px;
     font-weight: 500;
     font-size: 0.9rem;
-  }
+}
   
-  .success-message {
+.success-message {
     background: rgba(72, 187, 120, 0.1);
     border: 1px solid rgba(72, 187, 120, 0.3);
     color: #2f855a;
-  }
+}
   
-  .error-message {
+.error-message {
     background: rgba(245, 101, 101, 0.1);
     border: 1px solid rgba(245, 101, 101, 0.3);
     color: #c53030;
-  }
+}
   
-  /* Form Styles */
-  .contact-form {
+/* Form Styles */
+.contact-form {
     display: flex;
     flex-direction: column;
     gap: 18px;
-  }
+}
   
-  .form-row {
+.form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 18px;
-  }
+}
   
-  .form-group {
+.form-group {
     display: flex;
     flex-direction: column;
     gap: 6px;
-  }
-  
-  .form-group label {
+}
+
+.form-group label {
     font-weight: 600;
     color: #2d3748;
     font-size: 0.9rem;
-  }
+}
   
-  .form-group input,
-  .form-group textarea {
+.form-group input,
+.form-group textarea {
     padding: 12px 15px;
     border: 2px solid rgba(102, 126, 234, 0.2);
     border-radius: 10px;
@@ -179,22 +181,22 @@
     backdrop-filter: blur(5px);
     transition: all 0.3s ease;
     color: #2d3748;
-  }
+}
   
-  .form-group input:focus,
-  .form-group textarea:focus {
+.form-group input:focus,
+.form-group textarea:focus {
     outline: none;
     border-color: #667eea;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     background: rgba(255, 255, 255, 1);
     transform: translateY(-1px);
-  }
+}
   
-  .form-group textarea {
+.form-group textarea {
     resize: vertical;
     min-height: 100px;
     font-family: inherit;
-  }
+}
   
   .form-group input::placeholder,
   .form-group textarea::placeholder {

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import './contact.css';
 import Navbar from '../../auth/navbar/navbar';
+import Footer from '../Footer/footer';
 
 type FormData = {
   name: string;
@@ -179,7 +180,7 @@ export default function ContactUs() {
                   <i className="fas fa-envelope"></i>
                 </div>
                 <h3>Email</h3>
-                <p>contact@yoursite.com<br />support@yoursite.com</p>
+                <p>pro_hire@gmail.com<br />prohiresupport@yoursite.com</p>
               </div>
 
               <div className="info-card">
@@ -187,7 +188,7 @@ export default function ContactUs() {
                   <i className="fas fa-phone"></i>
                 </div>
                 <h3>Phone</h3>
-                <p>+977 98XXXXXXXX<br />Available 24/7</p>
+                <p>+977 9833445566<br />Available 24/7</p>
               </div>
 
               <div className="info-card">
@@ -208,6 +209,7 @@ export default function ContactUs() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

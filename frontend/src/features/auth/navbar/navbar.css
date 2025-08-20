@@ -51,7 +51,7 @@
 }
 
 .navbar-right a:hover {
-  color: #2fe1ae;
+  color: #c182ee;
 }
 
 /* Navbar Profile Icon Styles */
@@ -70,7 +70,7 @@
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #98d0f6, #4dbc9d);
+  background: linear-gradient(135deg, #be98f6, #4d9ebc);
   display: flex;
   align-items: center;
   justify-content: center;

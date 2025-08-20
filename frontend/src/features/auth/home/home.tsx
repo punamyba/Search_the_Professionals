@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './home.css';
 import Navbar from '../../auth/navbar/navbar';
+import Footer from '../Footer/footer';
 
 
 type User = {
@@ -215,6 +216,7 @@ export default function Home() {
           ))}
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

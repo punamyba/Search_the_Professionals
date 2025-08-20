@@ -9,8 +9,8 @@
    }
    
    .circle {
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     border: 2px solid #7ac6f3;
     border-radius: 50%;
     display: flex;
@@ -22,8 +22,8 @@
     position: absolute;
     top: -3px;
     left: -3px;
-    width: 38px;
-    height: 38px;
+    width: 40px;
+    height: 40px;
     border: 1px solid #7ac6f3;
     border-radius: 50%;
     opacity: 0.4;

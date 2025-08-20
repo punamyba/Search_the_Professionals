@@ -4,6 +4,7 @@ import Navbar from '../../auth/navbar/navbar';
 import './profile.css';
 import EducationSection from '../EducationSection/education';
 import ExperienceSection from '../ExperienceSection/experience';
+import Footer from '../Footer/footer';
 
 type User = {
   _id: string;
@@ -372,6 +373,7 @@ export default function Profile() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

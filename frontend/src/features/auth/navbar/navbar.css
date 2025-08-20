@@ -1,54 +1,94 @@
 .navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #f7f7fc;
-    padding: 16px 30px;
-    border-radius: 40px;
-    margin: 12px;
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    height: 80px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f7f7fc;
+  padding: 16px 30px;
+  border-radius: 40px;
+  margin: 12px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  height: 80px;
+}
+
+.navbar-left .logo {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.logo{
+  color:  rgb(122, 198, 243);
+}
+
+.navbar-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.search-input {
+  padding: 8px 14px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  width: 260px;
+  font-size: 14px;
+}
+
+.navbar-right {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+}
+
+.navbar-right a {
+  text-decoration: none;
+  color: #333;
+  font-size: 15px;
+  transition: color 0.2s;
+  cursor: pointer;
+}
+
+.navbar-right a:hover {
+  color: #2fe1ae;
+}
+
+/* Navbar Profile Icon Styles */
+.navbar-profile-icon {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 50%;
+}
+
+.navbar-profile-icon:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(49, 162, 237, 0.3);
+}
+
+.navbar-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #98d0f6, #4dbc9d);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  border: 2px solid rgba(49, 162, 237, 0.2);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .navbar-right {
+    gap: 20px;
   }
   
-  .navbar-left .logo {
-    font-size: 22px;
-    font-weight: bold;
-    
-  }
-  
-  .logo{
-    color: rgb(49, 162, 237);
-  }
-  .navbar-center {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-  }
-  
-  .search-input {
-    padding: 8px 14px;
-    border: 1px solid #ccc;
-    border-radius:20px;
-    width: 260px;
+  .navbar-avatar {
+    width: 34px;
+    height: 34px;
     font-size: 14px;
   }
-  
-  .navbar-right {
-    display: flex;
-    gap: 40px; /* more gap for nav items */
-  }
-  
-  .navbar-right a {
-    text-decoration: none;
-    color: #333;
-    font-size: 15px;
-    transition: color 0.2s;
-  }
-  
-  .navbar-right a:hover {
-    color: #2fe1ae;
-  }
-  
+}

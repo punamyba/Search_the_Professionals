@@ -1,13 +1,16 @@
-// user.route.js
-import { Router } from 'express';
-import { getUserList, searchUsers, getUserProfile} from '../controller/user.controller.js';
-import { authMiddleware } from '../middleware/auth.middleware.js';
+import express from 'express';
+import { getUserList, searchUsers, getUserProfile } from '../controller/user.controller.js';
+import { uploadProfilePic, deleteProfilePic } from '../controller/profile-picture.controller.js';
+import { authMiddleware } from "../middleware/auth.middleware.js";
+import { upload } from "../middleware/image-uploader.middleware.js";
 
+const router = express.Router();
 
-const router = Router();
+router.get('/list', getUserList);
+router.get('/search', searchUsers);
+router.get('/profile/:id', getUserProfile);
 
-router.get("/list", authMiddleware, getUserList);
-router.get("/search", authMiddleware, searchUsers); // 🔍 NEW SEARCH ROUTE
-router.get('/profile/:userId', authMiddleware, getUserProfile);
+router.patch('/uploadProfilePic', authMiddleware, upload.single('image'), uploadProfilePic);
+router.delete("/deleteProfilePic", authMiddleware, deleteProfilePic);
 
 export default router;

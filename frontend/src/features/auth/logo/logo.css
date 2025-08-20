@@ -1,0 +1,44 @@
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+   }
+   
+   .circle-container {
+    position: relative;
+   }
+   
+   .circle {
+    width: 32px;
+    height: 32px;
+    border: 2px solid #7ac6f3;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+   }
+   
+   .outer-circle {
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    width: 38px;
+    height: 38px;
+    border: 1px solid #7ac6f3;
+    border-radius: 50%;
+    opacity: 0.4;
+   }
+   
+   .pro-text {
+    font-size: 12px;
+    font-weight: bold;
+    color: #7ac6f3;
+    z-index: 1;
+   }
+   
+   .hire-text {
+    font-size: 18px;
+    font-weight: bold;
+    color: #8b5cf6;
+    margin: 0;
+   }

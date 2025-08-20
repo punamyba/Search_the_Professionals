@@ -2,39 +2,39 @@ import { useState } from 'react';
 import './register.css';
 import { useNavigate } from 'react-router-dom';
 import { type RegisterFormData, registerApi } from '../../../shared/config/api';
+import { useForm } from 'react-hook-form';
 
 function Register() {
-  const [form, setFormData] = useState<RegisterFormData>({
-    username: '',
-    email: '',
-    password: '',
-    phone: '',
-    address: '',
-    jobCategory: '',
-    interests: '',
-    bio: ''
-  });
-
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isSubmitting }
+  } = useForm<RegisterFormData>({
+    mode: 'onChange',
+    defaultValues: {
+      username: '',
+      email: '',
+      password: '',
+      phone: '',
+      address: '',
+      bio: ''
+    }
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  // Watch bio field for character count
+  const bioValue = watch('bio') || '';
+
+  const onSubmit = async (formData: RegisterFormData) => {
     setError('');
 
     try {
       // Clean the payload by removing empty strings (optional fields)
       const payload = Object.fromEntries(
-        Object.entries(form).filter(([_, value]) => value.trim() !== '')
+        Object.entries(formData).filter(([_, value]) => value && value.trim() !== '')
       ) as RegisterFormData;
 
       console.log('Register Data:', payload);
@@ -45,14 +45,12 @@ function Register() {
       const errorResponse = (err as any)?.response;
       console.error('Register Error Response:', errorResponse?.data || errorResponse);
       setError(errorResponse?.data?.message || 'Registration failed');
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
     <div className="register-wrapper">
-      <form className="register-card" onSubmit={handleSubmit}>
+      <form className="register-card" onSubmit={handleSubmit(onSubmit)}>
         <h2 className="register-title">Register</h2>
 
         <div className="register-field">
@@ -60,11 +58,25 @@ function Register() {
           <input
             type="text"
             id="username"
-            name="username"
-            value={form.username}
-            onChange={handleChange}
-            required
+            className={errors.username ? 'error' : ''}
+            {...register('username', {
+              required: 'Username is required',
+              minLength: {
+                value: 3,
+                message: 'Username must be at least 3 characters'
+              },
+              maxLength: {
+                value: 30,
+                message: 'Username cannot exceed 30 characters'
+              },
+              validate: {
+                notEmpty: (value) => (value && value.trim() !== '') || 'Username cannot be empty'
+              }
+            })}
           />
+          {errors.username && (
+            <span className="field-error">{errors.username.message}</span>
+          )}
         </div>
 
         <div className="register-field">
@@ -72,11 +84,21 @@ function Register() {
           <input
             type="email"
             id="email"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            required
+            className={errors.email ? 'error' : ''}
+            {...register('email', {
+              required: 'Email is required',
+              pattern: {
+                value: /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
+                message: 'Please enter a valid email'
+              },
+              validate: {
+                notEmpty: (value) => (value && value.trim() !== '') || 'Email cannot be empty'
+              }
+            })}
           />
+          {errors.email && (
+            <span className="field-error">{errors.email.message}</span>
+          )}
         </div>
 
         <div className="register-field">
@@ -84,11 +106,21 @@ function Register() {
           <input
             type="password"
             id="password"
-            name="password"
-            value={form.password}
-            onChange={handleChange}
-            required
+            className={errors.password ? 'error' : ''}
+            {...register('password', {
+              required: 'Password is required',
+              minLength: {
+                value: 6,
+                message: 'Password must be at least 6 characters'
+              },
+              validate: {
+                notEmpty: (value) => (value && value.trim() !== '') || 'Password cannot be empty'
+              }
+            })}
           />
+          {errors.password && (
+            <span className="field-error">{errors.password.message}</span>
+          )}
         </div>
 
         <div className="register-field">
@@ -96,10 +128,22 @@ function Register() {
           <input
             type="text"
             id="phone"
-            name="phone"
-            value={form.phone}
-            onChange={handleChange}
+            className={errors.phone ? 'error' : ''}
+            placeholder="Enter your contact number"
+            {...register('phone', {
+              required: 'Phone number is required',
+              pattern: {
+                value: /^\d{7,15}$/,
+                message: 'Phone number must be 7-15 digits only'
+              },
+              validate: {
+                notEmpty: (value) => (value && value.trim() !== '') || 'Phone number cannot be empty'
+              }
+            })}
           />
+          {errors.phone && (
+            <span className="field-error">{errors.phone.message}</span>
+          )}
         </div>
 
         <div className="register-field">
@@ -107,52 +151,41 @@ function Register() {
           <input
             type="text"
             id="address"
-            name="address"
-            value={form.address}
-            onChange={handleChange}
+            className={errors.address ? 'error' : ''}
+            {...register('address', {
+              required: 'Address is required',
+              validate: {
+                notEmpty: (value) => (value && value.trim() !== '') || 'Address cannot be empty'
+              }
+            })}
           />
-        </div>
-
-        <div className="register-field">
-          <label htmlFor="jobCategory">Job Category:</label>
-          <select
-            name="jobCategory"
-            id="jobCategory"
-            value={form.jobCategory}
-            onChange={handleChange}
-          >
-            <option value="">Select a category</option>
-            <option value="developer">Developer</option>
-            <option value="designer">Designer</option>
-            <option value="manager">Manager</option>
-            <option value="marketing">Marketing</option>
-          </select>
-        </div>
-
-        <div className="register-field">
-          <label htmlFor="interests">Interests (comma separated):</label>
-          <input
-            type="text"
-            id="interests"
-            name="interests"
-            value={form.interests}
-            onChange={handleChange}
-          />
+          {errors.address && (
+            <span className="field-error">{errors.address.message}</span>
+          )}
         </div>
 
         <div className="register-field">
           <label htmlFor="bio">Bio:</label>
           <textarea
             id="bio"
-            name="bio"
-            value={form.bio}
-            onChange={handleChange}
             rows={3}
+            className={errors.bio ? 'error' : ''}
+            placeholder="Tell us about yourself (optional)"
+            {...register('bio', {
+              maxLength: {
+                value: 500,
+                message: 'Bio must be under 500 characters'
+              }
+            })}
           />
+          {errors.bio && (
+            <span className="field-error">{errors.bio.message}</span>
+          )}
+          <small className="char-count">{bioValue.length}/500 characters</small>
         </div>
 
-        <button className="register-btn" type="submit" disabled={loading}>
-          {loading ? 'Registering...' : 'Register'}
+        <button className="register-btn" type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Registering...' : 'Register'}
         </button>
 
         {error && <div className="register-error">{error}</div>}

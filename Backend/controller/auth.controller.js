@@ -2,18 +2,13 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
 
-// backend/controller/auth.controller.js (Only the register function part)
 export async function register(req, res) {
     try {
-      const { username, email, password, phone, address, jobCategory, interests, bio } = req.body;
+      const { username, email, password, phone, address, bio } = req.body;
   
-      if (!username || !email || !password || !phone || !address || !jobCategory) {
+      // YO LINE MA `)` MISSING THIYEKO - FIX GAREKO
+      if (!username || !email || !password || !phone || !address) {
         return res.status(400).json({ message: 'All required fields must be filled' });
-      }
-  
-      const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
-      if (!emailRegex.test(email)) {
-        return res.status(400).json({ message: 'Invalid email format' });
       }
   
       const existing = await User.findOne({ $or: [{ username }, { email }] });
@@ -24,22 +19,15 @@ export async function register(req, res) {
       const hashedPassword = await bcrypt.hash(password, 10);
   
       const userData = {
-        username: username.trim(),
-        email: email.trim().toLowerCase(),
+        username,
+        email,
         password: hashedPassword,
         phone,
         address,
-        jobCategory,
-        interests: interests || [],
         bio: bio || ""
       };
   
       const user = new User(userData);
-      const validationError = user.validateSync();
-      if (validationError) {
-        return res.status(400).json({ message: 'Validation failed', error: validationError.message });
-      }
-  
       await user.save();
   
       const token = jwt.sign(
@@ -58,11 +46,10 @@ export async function register(req, res) {
         token
       });
     } catch (error) {
-      console.error('❌ Registration error:', error);
+      console.error(' Registration error:', error);
       return res.status(500).json({ message: 'Server error', error: error.message });
     }
-  }
-  
+}
 
 export async function login(req, res) {
     try {
@@ -72,7 +59,6 @@ export async function login(req, res) {
             return res.status(400).json({ message: 'Username and password are required' });
         }
 
-        //  Allow login with username OR email
         const user = await User.findOne({
             $or: [{ username }, { email: username }]
         });
@@ -104,7 +90,7 @@ export async function login(req, res) {
         });
 
     } catch (error) {
-        console.error('Login error:', error);
+        console.error(' Login error:', error);
         return res.status(500).json({ 
             message: 'Server error', 
             error: error.message 

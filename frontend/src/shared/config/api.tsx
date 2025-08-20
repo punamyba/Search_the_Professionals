@@ -13,8 +13,6 @@ export type RegisterFormData = {
   password: string;
   phone?: string;
   address?: string;
-  jobCategory?: string;
-  interests?: string;
   bio?: string;
 };
 

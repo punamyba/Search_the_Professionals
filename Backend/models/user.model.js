@@ -32,18 +32,22 @@ const userSchema = new Schema({
     type: String,
     required: [true, 'Address is required']
   },
-  jobCategory: {
-    type: String,
-    required: [true, 'Job category is required']
-  },
-  interests: {
-    type: [String],
-    default: []
-  },
   bio: {
     type: String,
     maxlength: [500, 'Bio must be under 500 characters']
+  },
+  profilePicture: {
+    url: {
+      type: String,
+      default: ''
+    },
+    public_id: {
+      type: String,
+      default: ''
+    }
   }
+
+
 }, {
   timestamps: true
 });

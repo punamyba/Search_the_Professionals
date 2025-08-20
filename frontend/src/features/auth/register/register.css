@@ -16,7 +16,7 @@ html, body, #root {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: linear-gradient(white, #8de0fa, rgb(166, 247, 166), white);
+  background: linear-gradient( rgb(164, 226, 248), white);
 }
 
 .register-card {
@@ -32,7 +32,7 @@ html, body, #root {
 
 .register-title {
   text-align: center;
-  color: #1dc223;
+  color: #48c3fd;
   font-size: 2rem;
   margin-bottom: 1rem;
 }
@@ -59,7 +59,7 @@ html, body, #root {
 .register-btn {
   padding: 12px;
   border-radius: 10px;
-  background-color: #70d457;
+  background-color: #78d3f1;
   color: white;
   font-weight: bold;
   border: none;
@@ -68,7 +68,7 @@ html, body, #root {
 }
 
 .register-btn:hover {
-  background-color: #48d963;
+  background-color: #56b6ee;
 }
 
 .register-error {
@@ -79,4 +79,46 @@ html, body, #root {
 .register-login-link {
   text-align: center;
   font-size: 0.9rem;
+}
+
+/* Error input styling */
+.register-field input.error,
+.register-field textarea.error {
+  border: 2px solid #e74c3c;
+  background-color: rgba(231, 76, 60, 0.1);
+}
+
+.register-field input.error:focus,
+.register-field textarea.error:focus {
+  border-color: #e74c3c;
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
+}
+
+/* Field error message styling */
+.field-error {
+  display: block;
+  color: #e74c3c;
+  font-size: 0.85rem;
+  margin-top: 5px;
+  font-weight: 500;
+}
+
+/* Character count styling */
+.char-count {
+  display: block;
+  color: #666;
+  font-size: 0.8rem;
+  margin-top: 3px;
+  text-align: right;
+}
+
+/* Form submission error styling */
+.register-error {
+  background-color: rgba(231, 76, 60, 0.1);
+  color: #e74c3c;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 15px;
+  border-left: 4px solid #e74c3c;
+  font-weight: 500;
 }

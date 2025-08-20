@@ -3,6 +3,10 @@ import cors from 'cors';
 
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js'; // if it exists
+import experienceRoutes from './routes/experience.route.js';
+
+// Routes
+app.use('/api/user/experience', experienceRoutes);
 
 const app = express();
 

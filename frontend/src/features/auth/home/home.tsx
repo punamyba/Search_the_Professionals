@@ -3,15 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import './home.css';
 import Navbar from '../../auth/navbar/navbar';
 
+
 type User = {
   _id: string;
   username: string;
   email: string;
-  phone?: string | null;
   address?: string | null;
-  jobCategory?: string | null;
-  interests?: string | null;
-  bio?: string | null;
+  profilePicture?: {    // Yo line add gara
+    url?: string;
+    public_id?: string;
+  };
 }
 
 export default function Home() {
@@ -49,7 +50,7 @@ export default function Home() {
       if (response.ok) {
         const data = await response.json();
         setUsers(data.users || []);
-        console.log('✅ Users loaded from backend database:', data.users?.length);
+        console.log(' Users loaded from backend database:', data.users?.length);
       } else {
         setError('Failed to get users from backend');
       }
@@ -76,7 +77,7 @@ export default function Home() {
       if (response.ok) {
         const data = await response.json();
         setUsers(data.users || []);
-        console.log('🔍 Backend search results:', data.users?.length, 'for query:', query);
+        console.log(' Backend search results:', data.users?.length, 'for query:', query);
       } else {
         setError('Backend search failed');
       }
@@ -113,89 +114,95 @@ export default function Home() {
         <div className="home-content">
           
           <section className="hero-section">
-            <h1>Welcome back, {username} 🌼</h1>
-            <p>Discover amazing job opportunities and connect with professionals.</p>
+            <h1>Welcome , {username} </h1>
+            <p>Ready to discover amazing opportunities and connect with wonderful people? Let's make today productive!</p>
 
             <div className="search-container">
               <input
                 type="text"
                 className="search-bar"
-                placeholder="Search users in backend database..."
+                placeholder="Search users..."
                 value={searchText}
                 onChange={(e) => handleSearch(e.target.value)}
               />
             </div>
 
-            <div className="results-info">
-              {loading && "Searching in backend database..."}
-              {error && `Error: ${error}`}
-              {!loading && !error && searchText && `${users.length} users found in backend for "${searchText}"`}
-              {!loading && !error && !searchText && `${users.length} total users from backend database`}
-            </div>
+            {/* Only show results-info when there's something to show */}
+            {(loading || error || searchText) && (
+              <div className="results-info">
+                {loading && "Searching..."}
+                {error && `Error: ${error}`}
+                {!loading && !error && searchText && `${users.length} users found for "${searchText}"`}
+              </div>
+            )}
 
             {error && (
               <button onClick={getUsers} className="retry-btn">
-                Reload from Backend
+                Reload
               </button>
             )}
           </section>
 
-          <section className="features">
-            <div className="feature-card">
-              <h3>💼 Job Listings</h3>
-              <p>Browse jobs tailored to your skills and interests.</p>
-            </div>
-            <div className="feature-card">
-              <h3>🧑‍💻 Create Your Profile</h3>
-              <p>Build a standout profile to attract top employers.</p>
-            </div>
-            <div className="feature-card">
-              <h3>📢 Post a Job</h3>
-              <p>Looking to hire? Post jobs and find the right talent.</p>
-            </div>
-          </section>
+          {/* Only showing features section when NOT searching */}
+          {!searchText && (
+            <section className="features">
+              <div className="feature-card">
+                <h3> Job Listings</h3>
+                <p>Browse jobs tailored to your skills and interests.</p>
+              </div>
+              <div className="feature-card">
+                <h3> Update Your Profile</h3>
+                <p>Build a standout profile to attract top employers.</p>
+                
+              </div>
+              <div className="feature-card">
+                <h3> Post a Job</h3>
+                <p>Looking to hire? Post jobs and find the right talent.</p>
+              </div>
+            </section>
+          )}
         </div>
 
         <div className="user-grid">
-          {loading && <div>Loading from backend database...</div>}
+          {loading && <div>Loading...</div>}
           
           {error && (
             <div className="error-message">
-              <p>❌ {error}</p>
+              <p> {error}</p>
               <button onClick={getUsers}>Try Again</button>
             </div>
           )}
 
           {!loading && !error && users.length === 0 && searchText && (
             <div className="no-results">
-              <p>No users found in backend database for "{searchText}"</p>
+              <p>No users found for "{searchText}"</p>
             </div>
           )}
 
           {!loading && !error && users.map(user => (
             <div key={user._id} className="user-card">
               <div className="user-avatar">
-                {user.username.charAt(0).toUpperCase()}
-              </div>
+                {user.profilePicture?.url ? (
+                  <img 
+                    src={user.profilePicture.url} 
+                    alt={user.username}
+                    style={{
+                       width: '80px',
+                       height: '80px',
+                       borderRadius: '50%',
+                       objectFit: 'cover'
+                      }}
+                   />
+                ) : (
+               user.username.charAt(0).toUpperCase()
+             )}
+            </div>
               
               <h3>{user.username}</h3>
               <p className="user-email">{user.email}</p>
               
-              {user.jobCategory && (
-                <p className="job-category">
-                  💼 {user.jobCategory.charAt(0).toUpperCase() + user.jobCategory.slice(1)}
-                </p>
-              )}
-              
               {user.address && (
-                <p className="user-address">📍 {user.address}</p>
-              )}
-              
-              {user.interests && typeof user.interests === 'string' && (
-                <p className="user-interests">
-                  🎯 {user.interests.split(',').slice(0, 2).join(', ')}
-                  {user.interests.split(',').length > 2 && '...'}
-                </p>
+                <p className="user-address"> {user.address}</p>
               )}
               
               <button 

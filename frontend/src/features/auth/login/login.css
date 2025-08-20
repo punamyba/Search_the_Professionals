@@ -15,7 +15,7 @@ html, body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: linear-gradient(white, #8de0fa, rgb(166, 247, 166), white);
+    background: linear-gradient( rgb(164, 226, 248), white);
     background-size: 100% 100%;
     animation: subtlePulse 2s ease-in-out infinite;
   }

@@ -1,4 +1,4 @@
-// backend/routes/skills.routes.js
+// backend/routes/skill.route.js
 import express from 'express';
 import {
     getUserSkills,

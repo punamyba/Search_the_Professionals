@@ -1,4 +1,5 @@
-// backend/controllers/skills.controller.js
+// backend/controllers/skill.controller.js
+import mongoose from 'mongoose';
 import Skill from '../models/skill.model.js';
 import User from '../models/user.model.js';
 
@@ -7,11 +8,28 @@ export async function getUserSkills(req, res) {
     try {
         const { userId } = req.params;
         
-        const skills = await Skill.find({ userId }).sort({ createdAt: -1 });
+        // Validate ObjectId
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid user ID'
+            });
+        }
+        
+        // Get user with populated skills
+        const user = await User.findById(userId).populate('skillsIds');
+        
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
         
         res.status(200).json({
             success: true,
-            skills
+            message: "User skills retrieved successfully",
+            skills: user.skillsIds
         });
     } catch (error) {
         console.error('Get user skills error:', error);
@@ -36,11 +54,19 @@ export async function addSkill(req, res) {
             });
         }
 
-        // Check if skill already exists for this user
-        const existingSkill = await Skill.findOne({ 
-            userId, 
-            skillName: new RegExp(`^${skillName.trim()}$`, 'i') 
-        });
+        // Find user
+        const user = await User.findById(userId).populate('skillsIds');
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // Check if skill already exists (using populated skills)
+        const existingSkill = user.skillsIds.find(skill => 
+            skill.skillName.toLowerCase() === skillName.trim().toLowerCase()
+        );
 
         if (existingSkill) {
             return res.status(400).json({
@@ -57,6 +83,10 @@ export async function addSkill(req, res) {
         });
 
         await newSkill.save();
+
+        // Add skill to user's skillsIds array
+        user.skillsIds.push(newSkill._id);
+        await user.save();
 
         res.status(201).json({
             success: true,
@@ -80,6 +110,13 @@ export async function addSkill(req, res) {
             });
         }
 
+        if (error.code === 11000) {
+            return res.status(400).json({
+                success: false,
+                message: 'This skill already exists in your profile'
+            });
+        }
+
         res.status(500).json({
             success: false,
             message: 'Server error occurred'
@@ -94,25 +131,56 @@ export async function updateSkill(req, res) {
         const { skillId } = req.params;
         const { skillName, level } = req.body;
 
-        // Find and update skill
-        const updatedSkill = await Skill.findOneAndUpdate(
-            { _id: skillId, userId },
-            { 
-                skillName: skillName?.trim(),
-                level: level || 'Intermediate'
-            },
-            { 
-                new: true, 
-                runValidators: true 
-            }
-        );
+        // Validate ObjectId
+        if (!mongoose.Types.ObjectId.isValid(skillId)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid skill ID'
+            });
+        }
 
-        if (!updatedSkill) {
+        // Find user and check if skill belongs to them
+        const user = await User.findById(userId).populate('skillsIds');
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        const skillExists = user.skillsIds.find(skill => skill._id.toString() === skillId);
+        if (!skillExists) {
             return res.status(404).json({
                 success: false,
                 message: 'Skill not found or you do not have permission to update it'
             });
         }
+
+        // Check for duplicate skill name (if updating name)
+        if (skillName && skillName.trim()) {
+            const duplicateSkill = user.skillsIds.find(skill => 
+                skill._id.toString() !== skillId && 
+                skill.skillName.toLowerCase() === skillName.trim().toLowerCase()
+            );
+
+            if (duplicateSkill) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'A skill with this name already exists'
+                });
+            }
+        }
+
+        // Update the skill
+        const updateData = {};
+        if (skillName && skillName.trim()) updateData.skillName = skillName.trim();
+        if (level) updateData.level = level;
+
+        const updatedSkill = await Skill.findByIdAndUpdate(
+            skillId,
+            updateData,
+            { new: true, runValidators: true }
+        );
 
         res.status(200).json({
             success: true,
@@ -122,6 +190,14 @@ export async function updateSkill(req, res) {
 
     } catch (error) {
         console.error('Update skill error:', error);
+        
+        if (error.code === 11000) {
+            return res.status(400).json({
+                success: false,
+                message: 'A skill with this name already exists'
+            });
+        }
+        
         res.status(500).json({
             success: false,
             message: 'Server error occurred'
@@ -135,17 +211,45 @@ export async function deleteSkill(req, res) {
         const userId = req.user.id;
         const { skillId } = req.params;
 
-        const deletedSkill = await Skill.findOneAndDelete({ 
-            _id: skillId, 
-            userId 
-        });
+        // Validate ObjectId
+        if (!mongoose.Types.ObjectId.isValid(skillId)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid skill ID'
+            });
+        }
 
-        if (!deletedSkill) {
+        // Find user
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // Check if skill belongs to user
+        const skillIndex = user.skillsIds.findIndex(id => id.toString() === skillId);
+        if (skillIndex === -1) {
             return res.status(404).json({
                 success: false,
                 message: 'Skill not found or you do not have permission to delete it'
             });
         }
+
+        // Delete skill from Skills collection
+        const deletedSkill = await Skill.findByIdAndDelete(skillId);
+        
+        if (!deletedSkill) {
+            return res.status(404).json({
+                success: false,
+                message: 'Skill not found'
+            });
+        }
+
+        // Remove skill ID from user's skillsIds array
+        user.skillsIds.splice(skillIndex, 1);
+        await user.save();
 
         res.status(200).json({
             success: true,

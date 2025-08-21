@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../../auth/navbar/navbar';
 import './profile.css';
@@ -50,6 +50,12 @@ type EditProfile = {
   expectedSalary: string;
 };
 
+type Skill = {
+  _id: string;
+  skillName: string;
+  level: string;
+};
+
 type User = {
   _id: string;
   username: string;
@@ -63,6 +69,7 @@ type User = {
   };
   experiences?: Experience[];
   educations?: Education[];
+  skills?: Skill[]; // Added skills to User type
   editProfile?: EditProfile;
 }
 
@@ -103,7 +110,7 @@ export default function Profile() {
         console.log('Fetching profile for userId:', userId);
         console.log('Using token:', token ? 'Token exists' : 'No token');
         
-        // Single API call to get all data
+        // Single API call to get all data including skills
         const response = await fetch(`http://localhost:3000/api/user/profile/${userId}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -116,9 +123,10 @@ export default function Profile() {
         if (response.ok) {
           const data = await response.json();
           console.log('Profile data received:', data);
+          console.log('Skills in profile:', data.user.skills); // Debug skills
           setUser(data.user);
           
-          // Set experiences and educations from populated data
+          // Set experiences, educations, and skills from populated data
           setExperiences(data.user.experiences || []);
           setEducations(data.user.educations || []);
         } else {
@@ -137,6 +145,17 @@ export default function Profile() {
       getUser();
     }
   }, [userId]);
+
+  // Memoized callback to handle skills updates
+  const handleSkillsUpdate = useCallback((updatedSkills: Skill[]) => {
+    setUser(prevUser => {
+      if (!prevUser) return prevUser;
+      return {
+        ...prevUser,
+        skills: updatedSkills
+      };
+    });
+  }, []);
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -385,12 +404,13 @@ export default function Profile() {
                 </div>
               )}
 
-             {/* Skills Section */}
-
+             {/* Skills Section - Updated with props */}
             <div className="profile-section">
              <SkillsSection 
+              skills={user.skills || []}
               userId={userId} 
               isOwnProfile={isOwnProfile}
+              onSkillsUpdate={handleSkillsUpdate}
               />
             </div>
 

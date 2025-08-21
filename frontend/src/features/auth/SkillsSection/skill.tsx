@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { useForm, Controller } from 'react-hook-form';
 import './skill.css';
@@ -15,13 +15,14 @@ type SkillFormData = {
 };
 
 type SkillsSectionProps = {
-  userId: string | undefined;
+  skills?: Skill[];
+  userId?: string;
   isOwnProfile?: boolean;
+  onSkillsUpdate?: (skills: Skill[]) => void;
 };
 
-export default function SkillsSection({ userId, isOwnProfile }: SkillsSectionProps) {
-  const [skills, setSkills] = useState<Skill[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function SkillsSection({ skills = [], userId, isOwnProfile, onSkillsUpdate }: SkillsSectionProps) {
+  const [localSkills, setLocalSkills] = useState<Skill[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
 
   const skillLevels = ['Beginner', 'Intermediate', 'Advanced', 'Expert'];
@@ -41,53 +42,49 @@ export default function SkillsSection({ userId, isOwnProfile }: SkillsSectionPro
     }
   });
 
+  // Memoize skills to prevent unnecessary re-renders
+  const memoizedSkills = useMemo(() => skills, [skills]);
+
+  // Update local skills only when skills prop actually changes
   useEffect(() => {
-    if (userId) {
-      fetchSkills();
+    if (memoizedSkills && memoizedSkills.length !== localSkills.length) {
+      setLocalSkills(memoizedSkills);
     }
-  }, [userId]);
+  }, [memoizedSkills, localSkills.length]);
 
-  const fetchSkills = async () => {
-    try {
-      const response = await fetch(`http://localhost:3000/api/skills/user/${userId}`);
-      if (response.ok) {
-        const data = await response.json();
-        setSkills(data.skills || []);
-      } else {
-        console.error('Failed to fetch skills');
-      }
-    } catch (error) {
-      console.error('Error fetching skills:', error);
-    } finally {
-      setLoading(false);
+  // Memoized callback to prevent re-renders
+  const updateSkills = useCallback((newSkills: Skill[]) => {
+    setLocalSkills(newSkills);
+    if (onSkillsUpdate) {
+      onSkillsUpdate(newSkills);
     }
-  };
+  }, [onSkillsUpdate]);
 
-  const showModal = () => {
+  const showModal = useCallback(() => {
     setShowAddModal(true);
     document.body.classList.add('modal-open');
-  };
+  }, []);
 
-  const hideModal = () => {
+  const hideModal = useCallback(() => {
     setShowAddModal(false);
     reset();
     clearErrors();
     document.body.classList.remove('modal-open');
-  };
+  }, [reset, clearErrors]);
 
   // Check for duplicate skills
-  const checkDuplicateSkill = (skillName: string) => {
+  const checkDuplicateSkill = useCallback((skillName: string) => {
     const trimmedSkill = skillName.trim().toLowerCase();
-    const existingSkill = skills.find(skill => 
+    const existingSkill = localSkills.find(skill => 
       skill.skillName.toLowerCase() === trimmedSkill
     );
     return existingSkill ? 'This skill already exists in your profile' : true;
-  };
+  }, [localSkills]);
 
-  const onSubmit = async (data: SkillFormData) => {
+  const onSubmit = useCallback(async (data: SkillFormData) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/api/skills/add', {
+      const response = await fetch('http://localhost:3000/api/user/skills/add', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -102,10 +99,10 @@ export default function SkillsSection({ userId, isOwnProfile }: SkillsSectionPro
       const responseData = await response.json();
 
       if (response.ok) {
-        setSkills(prev => [responseData.skill, ...prev]);
+        const updatedSkills = [responseData.skill, ...localSkills];
+        updateSkills(updatedSkills);
         hideModal();
       } else {
-        // Handle server errors
         if (responseData.message?.includes('duplicate') || responseData.message?.includes('already exists')) {
           setError('skillName', {
             type: 'manual',
@@ -125,16 +122,16 @@ export default function SkillsSection({ userId, isOwnProfile }: SkillsSectionPro
         message: 'Network error occurred. Please try again.'
       });
     }
-  };
+  }, [localSkills, updateSkills, hideModal, setError]);
 
-  const handleDeleteSkill = async (skillId: string, skillName: string) => {
+  const handleDeleteSkill = useCallback(async (skillId: string, skillName: string) => {
     if (!window.confirm(`Are you sure you want to delete "${skillName}"?`)) {
       return;
     }
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3000/api/skills/delete/${skillId}`, {
+      const response = await fetch(`http://localhost:3000/api/user/skills/delete/${skillId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -143,7 +140,8 @@ export default function SkillsSection({ userId, isOwnProfile }: SkillsSectionPro
       });
 
       if (response.ok) {
-        setSkills(prev => prev.filter(skill => skill._id !== skillId));
+        const updatedSkills = localSkills.filter(skill => skill._id !== skillId);
+        updateSkills(updatedSkills);
       } else {
         const data = await response.json();
         alert(data.message || 'Failed to delete skill');
@@ -152,9 +150,9 @@ export default function SkillsSection({ userId, isOwnProfile }: SkillsSectionPro
       console.error('Error deleting skill:', error);
       alert('Failed to delete skill. Please try again.');
     }
-  };
+  }, [localSkills, updateSkills]);
 
-  const getSkillLevelColor = (level: string) => {
+  const getSkillLevelColor = useCallback((level: string) => {
     switch (level) {
       case 'Beginner': return '#95a5a6';
       case 'Intermediate': return '#3498db';
@@ -162,16 +160,7 @@ export default function SkillsSection({ userId, isOwnProfile }: SkillsSectionPro
       case 'Expert': return '#e74c3c';
       default: return '#3498db';
     }
-  };
-
-  if (loading) {
-    return (
-      <div className="skills-loading">
-        <div className="loading-spinner-small"></div>
-        <span>Loading skills...</span>
-      </div>
-    );
-  }
+  }, []);
 
   return (
     <>
@@ -192,8 +181,8 @@ export default function SkillsSection({ userId, isOwnProfile }: SkillsSectionPro
       </div>
 
       <div className="skills-container">
-        {skills.length > 0 ? (
-          skills.map((skill) => (
+        {localSkills.length > 0 ? (
+          localSkills.map((skill) => (
             <div 
               key={skill._id} 
               className="skill-tag-container"
@@ -234,7 +223,6 @@ export default function SkillsSection({ userId, isOwnProfile }: SkillsSectionPro
         )}
       </div>
 
-      {/* Add Skill Modal with Form Validation */}
       {showAddModal && (
         <>
           {typeof document !== 'undefined' && 
@@ -253,7 +241,6 @@ export default function SkillsSection({ userId, isOwnProfile }: SkillsSectionPro
                   </div>
 
                   <form onSubmit={handleSubmit(onSubmit)} className="add-skill-form">
-                    {/* General server error */}
                     {errors.root?.serverError && (
                       <div className="form-error general-error">
                         {errors.root.serverError.message}

@@ -12,6 +12,7 @@ import Profile from './features/auth/profile/profile'
 import axiosInstance from './shared/config/axiosinstance'
 import ContactUs from './features/auth/Contact/contact'
 import EditProfile from './features/auth/EditProfile/edit'
+import About from './features/auth/About/about'
 
 function App() {
 
@@ -50,8 +51,9 @@ function App() {
 
       <Route path='/notfound' element={<NotFound/>}/>
       
-      <Route path='//edit-profile' element={<EditProfile/>}/>
+      <Route path='/edit-profile' element={<EditProfile/>}/>
 
+      <Route path='/about' element={< About/>}/>
       <Route path='*' element={<NotFound/>}/>
     </Routes>
     </div>

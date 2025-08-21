@@ -26,7 +26,7 @@ const Footer = () => {
         <div className="footer-section">
           <h4>For Employers</h4>
           <div className="footer-links">
-            <Link to="/post-job">Post a Job</Link>
+            
             <Link to="/find-talent">Find Talent</Link>
             <Link to="/employer-resources">Resources</Link>
             <Link to="/pricing">Pricing</Link>
@@ -46,13 +46,13 @@ const Footer = () => {
         <div className="footer-right">
           <h4>Connect With Us</h4>
           <div className="social-links">
-            <a href="#" aria-label="LinkedIn">
+            <a href="https://www.linkedin.com/" aria-label="LinkedIn">
               <div className="social-icon">in</div>
             </a>
-            <a href="#" aria-label="Facebook">
+            <a href="https://www.facebook.com/" aria-label="Facebook">
               <div className="social-icon">f</div>
             </a>
-            <a href="#" aria-label="Twitter">
+            <a href="https://x.com/" aria-label="Twitter">
               <div className="social-icon">t</div>
             </a>
           </div>

@@ -7,6 +7,7 @@ export async function getUserList(req, res) {
         const users = await User.find({}, { password: 0 })
             .populate('experienceIds')
             .populate('educationIds')
+            .populate('skillsIds')
             .populate('editProfileId');
                      
         res.status(200).json({
@@ -15,6 +16,7 @@ export async function getUserList(req, res) {
                 ...user.toObject(),
                 experiences: user.experienceIds,
                 educations: user.educationIds,
+                skills: user.skillsIds,
                 editProfile: user.editProfileId
             }))
         });
@@ -38,6 +40,7 @@ export async function searchUsers(req, res) {
         }, { password: 0 })
         .populate('experienceIds')
         .populate('educationIds')
+        .populate('skillsIds')
         .populate('editProfileId');
                          
         res.status(200).json({
@@ -46,6 +49,7 @@ export async function searchUsers(req, res) {
                 ...user.toObject(),
                 experiences: user.experienceIds,
                 educations: user.educationIds,
+                skills: user.skillsIds,
                 editProfile: user.editProfileId
             }))
         });
@@ -67,6 +71,7 @@ export async function getUserProfile(req, res) {
         const user = await User.findById(id, { password: 0 })
             .populate('experienceIds')
             .populate('educationIds')
+            .populate('skillsIds')
             .populate('editProfileId');
                          
         if (!user) {
@@ -79,6 +84,7 @@ export async function getUserProfile(req, res) {
             email: user.email,
             experienceCount: user.experienceIds?.length || 0,
             educationCount: user.educationIds?.length || 0,
+            skillsCount: user.skillsIds?.length || 0,
             hasEditProfile: !!user.editProfileId
         });
                          
@@ -88,6 +94,7 @@ export async function getUserProfile(req, res) {
                 ...user.toObject(),
                 experiences: user.experienceIds,
                 educations: user.educationIds,
+                skills: user.skillsIds,
                 editProfile: user.editProfileId
             }
         });

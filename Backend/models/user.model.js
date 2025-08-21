@@ -56,6 +56,10 @@ const userSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Education'
   }],
+  skillsIds: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Skill'
+  }],
   editProfileId: {
     type: Schema.Types.ObjectId,
     ref: 'EditProfile'

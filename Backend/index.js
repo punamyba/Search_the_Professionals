@@ -9,17 +9,17 @@ import experienceRoutes from './routes/experience.route.js';
 import educationRoutes from './routes/education.route.js';
 import EditProfile from './models/editProfile.model.js';
 import { authMiddleware } from './middleware/auth.middleware.js';
+import skillsRoutes from './routes/skill.route.js';
 
 // Load environment variables
 dotenv.config();
 
 const app = express();
 
-
 // CORS Configuration
 app.use(cors({
   origin: ['http://localhost:5175', 'http://localhost:5174', 'http://localhost:3000', 'http://localhost:5173'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'], // Added PATCH
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -30,10 +30,11 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/user/experience', experienceRoutes);
-app.use('/api/user/education', educationRoutes); // Add this line
-// Make sure this line is added:
+app.use('/api/user/education', educationRoutes);
+app.use('/api/skills', skillsRoutes); // Changed from /api/skill to /api/skills
 app.use('/api/user', EditProfile);
-// Test auth route to verify JWT token is working
+
+// Test auth route
 app.get('/api/user/test-auth', authMiddleware, (req, res) => {
     res.json({ 
         message: 'Auth working', 
@@ -92,9 +93,9 @@ app.get('/api/debug/users', async (req, res) => {
         const totalUsers = await User.countDocuments();
         const allUsers = await User.find({}, '-password').sort({ createdAt: -1 });
                 
-        console.log(' Database Debug Info:');
-        console.log(' Total users in database:', totalUsers);
-        console.log(' All users:', allUsers.map(u => ({
+        console.log('Database Debug Info:');
+        console.log('Total users in database:', totalUsers);
+        console.log('All users:', allUsers.map(u => ({
             id: u._id,
             username: u.username,
             email: u.email,

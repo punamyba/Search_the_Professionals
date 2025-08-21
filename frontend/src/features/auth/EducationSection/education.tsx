@@ -1,5 +1,6 @@
 // components/education/EducationSection.tsx
 import { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { useForm } from 'react-hook-form';
 import './education.css';
 
@@ -83,7 +84,6 @@ export default function EducationSection({ userId, educations: propEducations, s
     const token = localStorage.getItem('token');
     if (token) {
       try {
-        // Decode JWT token to get current user ID
         const payload = JSON.parse(atob(token.split('.')[1]));
         setCurrentUserId(payload.userId || payload.id);
         setIsOwnProfile(payload.userId === userId || payload.id === userId);
@@ -93,7 +93,6 @@ export default function EducationSection({ userId, educations: propEducations, s
     }
   }, [userId]);
 
-  // FIXED: Use prop educations instead of fetching (NO API CALL)
   useEffect(() => {
     if (propEducations) {
       setEducationList(propEducations);
@@ -119,7 +118,6 @@ export default function EducationSection({ userId, educations: propEducations, s
 
     if (education) {
       setEditingEducation(education);
-      // Populate form with existing data
       reset({
         school: education.school,
         degree: education.degree,
@@ -136,6 +134,14 @@ export default function EducationSection({ userId, educations: propEducations, s
       reset();
     }
     setShowModal(true);
+    document.body.classList.add('modal-open');
+  };
+
+  const closeModal = () => {
+    reset();
+    setShowModal(false);
+    setEditingEducation(null);
+    document.body.classList.remove('modal-open');
   };
 
   const onSubmit = async (data: EducationFormData) => {
@@ -181,20 +187,16 @@ export default function EducationSection({ userId, educations: propEducations, s
         const responseData = await response.json();
         
         if (editingEducation) {
-          // Update existing education
           const updatedEducations = educationList.map(edu => 
             getEducationId(edu) === getEducationId(editingEducation) ? responseData.education : edu
           );
           updateEducationState(updatedEducations);
         } else {
-          // Add new education
           const newEducations = [...educationList, responseData.education];
           updateEducationState(newEducations);
         }
         
-        reset();
-        setShowModal(false);
-        setEditingEducation(null);
+        closeModal();
       } else {
         const errorData = await response.json();
         alert(errorData.message || 'Failed to save education');
@@ -236,12 +238,6 @@ export default function EducationSection({ userId, educations: propEducations, s
     }
   };
 
-  const closeModal = () => {
-    reset();
-    setShowModal(false);
-    setEditingEducation(null);
-  };
-
   return (
     <>
       <div className="sidebar-card">
@@ -249,7 +245,6 @@ export default function EducationSection({ userId, educations: propEducations, s
           <h3 className="card-title">
             <i className="fas fa-graduation-cap"></i> Education
           </h3>
-          {/* Only show add button if user is viewing their own profile */}
           {isOwnProfile && (
             <button 
               className="edu-add-btn"
@@ -267,7 +262,6 @@ export default function EducationSection({ userId, educations: propEducations, s
               <div key={getEducationId(edu) || index} className="edu-item">
                 <div className="edu-header">
                   <h4 className="edu-school">{edu.school}</h4>
-                  {/* Only show delete and edit buttons if user is viewing their own profile */}
                   {isOwnProfile && (
                     <div className="edu-actions">
                       <button 
@@ -311,247 +305,256 @@ export default function EducationSection({ userId, educations: propEducations, s
         )}
       </div>
 
-      {/* Education Modal - Only render if user is viewing their own profile */}
+      {/* Education Modal - Using Portal like Experience Section */}
       {showModal && isOwnProfile && (
-        <div className="edu-modal-overlay" onClick={closeModal}>
-          <div className="edu-modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="edu-modal-header">
-              <h2>{editingEducation ? 'Edit education' : 'Add education'}</h2>
-              <button 
-                className="edu-close-btn"
-                onClick={closeModal}
-              >
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit(onSubmit)} className="edu-form">
-              {/* School Field - Required with validation */}
-              <div className="edu-form-group">
-                <label htmlFor="school">School*</label>
-                <input
-                  type="text"
-                  id="school"
-                  placeholder="Ex: Boston University"
-                  className={errors.school ? 'error' : ''}
-                  {...register('school', {
-                    required: 'School name is required',
-                    minLength: {
-                      value: 2,
-                      message: 'School name must be at least 2 characters'
-                    },
-                    maxLength: {
-                      value: 100,
-                      message: 'School name cannot exceed 100 characters'
-                    },
-                    validate: {
-                      notEmpty: (value) => value.trim() !== '' || 'School name cannot be empty'
-                    }
-                  })}
-                />
-                {errors.school && (
-                  <span className="field-error">{errors.school.message}</span>
-                )}
-              </div>
-
-              {/* Degree Field - Required with validation */}
-              <div className="edu-form-group">
-                <label htmlFor="degree">Degree*</label>
-                <input
-                  type="text"
-                  id="degree"
-                  placeholder="Ex: Bachelor's"
-                  className={errors.degree ? 'error' : ''}
-                  {...register('degree', {
-                    required: 'Degree is required',
-                    minLength: {
-                      value: 2,
-                      message: 'Degree must be at least 2 characters'
-                    },
-                    maxLength: {
-                      value: 50,
-                      message: 'Degree cannot exceed 50 characters'
-                    },
-                    validate: {
-                      notEmpty: (value) => value.trim() !== '' || 'Degree cannot be empty'
-                    }
-                  })}
-                />
-                {errors.degree && (
-                  <span className="field-error">{errors.degree.message}</span>
-                )}
-              </div>
-
-              {/* Field of Study - Required with validation */}
-              <div className="edu-form-group">
-                <label htmlFor="fieldOfStudy">Field of study*</label>
-                <input
-                  type="text"
-                  id="fieldOfStudy"
-                  placeholder="Ex: Business"
-                  className={errors.fieldOfStudy ? 'error' : ''}
-                  {...register('fieldOfStudy', {
-                    required: 'Field of study is required',
-                    minLength: {
-                      value: 2,
-                      message: 'Field of study must be at least 2 characters'
-                    },
-                    maxLength: {
-                      value: 50,
-                      message: 'Field of study cannot exceed 50 characters'
-                    },
-                    validate: {
-                      notEmpty: (value) => value.trim() !== '' || 'Field of study cannot be empty'
-                    }
-                  })}
-                />
-                {errors.fieldOfStudy && (
-                  <span className="field-error">{errors.fieldOfStudy.message}</span>
-                )}
-              </div>
-
-              {/* Date Fields with validation */}
-              <div className="edu-form-row">
-                <div className="edu-form-group">
-                  <label>Start date*</label>
-                  <div className="edu-date-inputs">
-                    <select
-                      className={errors.startMonth ? 'error' : ''}
-                      {...register('startMonth', {
-                        required: 'Start month is required'
-                      })}
+        <>
+          {typeof document !== 'undefined' && 
+            document.body && 
+            ReactDOM.createPortal(
+              <div className="edu-modal-overlay" onClick={closeModal}>
+                <div className="edu-modal-content" onClick={(e) => e.stopPropagation()}>
+                  <div className="edu-modal-header">
+                    <h2>{editingEducation ? 'Edit education' : 'Add education'}</h2>
+                    <button 
+                      className="edu-close-btn"
+                      onClick={closeModal}
                     >
-                      <option value="">Month</option>
-                      {months.map(month => (
-                        <option key={month} value={month}>{month}</option>
-                      ))}
-                    </select>
-                    <select
-                      className={errors.startYear ? 'error' : ''}
-                      {...register('startYear', {
-                        required: 'Start year is required',
-                        validate: {
-                          notFuture: (value) => {
-                            if (!value) return true;
-                            const year = parseInt(value);
-                            return year <= currentYear || 'Start year cannot be in the future'
-                          },
-                          reasonable: (value) => {
-                            if (!value) return true;
-                            const year = parseInt(value);
-                            return year >= 1950 || 'Start year seems too old'
-                          }
-                        }
-                      })}
-                    >
-                      <option value="">Year</option>
-                      {years.map(year => (
-                        <option key={year} value={year}>{year}</option>
-                      ))}
-                    </select>
+                      <i className="fas fa-times"></i>
+                    </button>
                   </div>
-                  {(errors.startMonth || errors.startYear) && (
-                    <span className="field-error">
-                      {errors.startMonth?.message || errors.startYear?.message}
-                    </span>
-                  )}
-                </div>
 
-                <div className="edu-form-group">
-                  <label>End date (or expected)*</label>
-                  <div className="edu-date-inputs">
-                    <select
-                      className={errors.endMonth ? 'error' : ''}
-                      {...register('endMonth', {
-                        required: 'End month is required'
-                      })}
-                    >
-                      <option value="">Month</option>
-                      {months.map(month => (
-                        <option key={month} value={month}>{month}</option>
-                      ))}
-                    </select>
-                    <select
-                      className={errors.endYear ? 'error' : ''}
-                      {...register('endYear', {
-                        required: 'End year is required',
-                        validate: {
-                          afterStart: (value, formValues) => {
-                            if (!value || !formValues.startYear) return true;
-                            const endYearNum = parseInt(value);
-                            const startYearNum = parseInt(formValues.startYear);
-                            
-                            if (endYearNum < startYearNum) {
-                              return 'End year must be after start year';
-                            }
-                            
-                            // If same year, check months
-                            if (endYearNum === startYearNum && formValues.startMonth && formValues.endMonth) {
-                              const startMonthIndex = months.indexOf(formValues.startMonth);
-                              const endMonthIndex = months.indexOf(formValues.endMonth);
-                              if (endMonthIndex < startMonthIndex) {
-                                return 'End date must be after start date';
+                  <form onSubmit={handleSubmit(onSubmit)} className="edu-form">
+                    <div className="edu-form-group">
+                      <label htmlFor="school">School*</label>
+                      <input
+                        type="text"
+                        id="school"
+                        placeholder="Ex: Boston University"
+                        className={errors.school ? 'error' : ''}
+                        {...register('school', {
+                          required: 'School name is required',
+                          minLength: {
+                            value: 2,
+                            message: 'School name must be at least 2 characters'
+                          },
+                          maxLength: {
+                            value: 100,
+                            message: 'School name cannot exceed 100 characters'
+                          },
+                          validate: {
+                            notEmpty: (value) => value.trim() !== '' || 'School name cannot be empty'
+                          }
+                        })}
+                      />
+                      {errors.school && (
+                        <span className="field-error">{errors.school.message}</span>
+                      )}
+                    </div>
+
+                    <div className="edu-form-group">
+                      <label htmlFor="degree">Degree*</label>
+                      <input
+                        type="text"
+                        id="degree"
+                        placeholder="Ex: Bachelor's"
+                        className={errors.degree ? 'error' : ''}
+                        {...register('degree', {
+                          required: 'Degree is required',
+                          minLength: {
+                            value: 2,
+                            message: 'Degree must be at least 2 characters'
+                          },
+                          maxLength: {
+                            value: 50,
+                            message: 'Degree cannot exceed 50 characters'
+                          },
+                          validate: {
+                            notEmpty: (value) => value.trim() !== '' || 'Degree cannot be empty'
+                          }
+                        })}
+                      />
+                      {errors.degree && (
+                        <span className="field-error">{errors.degree.message}</span>
+                      )}
+                    </div>
+
+                    <div className="edu-form-group">
+                      <label htmlFor="fieldOfStudy">Field of study*</label>
+                      <input
+                        type="text"
+                        id="fieldOfStudy"
+                        placeholder="Ex: Business"
+                        className={errors.fieldOfStudy ? 'error' : ''}
+                        {...register('fieldOfStudy', {
+                          required: 'Field of study is required',
+                          minLength: {
+                            value: 2,
+                            message: 'Field of study must be at least 2 characters'
+                          },
+                          maxLength: {
+                            value: 50,
+                            message: 'Field of study cannot exceed 50 characters'
+                          },
+                          validate: {
+                            notEmpty: (value) => value.trim() !== '' || 'Field of study cannot be empty'
+                          }
+                        })}
+                      />
+                      {errors.fieldOfStudy && (
+                        <span className="field-error">{errors.fieldOfStudy.message}</span>
+                      )}
+                    </div>
+
+                    <div className="edu-form-row">
+                      <div className="edu-form-group">
+                        <label>Start date*</label>
+                        <div className="edu-date-inputs">
+                          <select
+                            className={errors.startMonth ? 'error' : ''}
+                            {...register('startMonth', {
+                              required: 'Start month is required'
+                            })}
+                          >
+                            <option value="">Month</option>
+                            {months.map(month => (
+                              <option key={month} value={month}>{month}</option>
+                            ))}
+                          </select>
+                          <select
+                            className={errors.startYear ? 'error' : ''}
+                            {...register('startYear', {
+                              required: 'Start year is required',
+                              validate: {
+                                notFuture: (value) => {
+                                  if (!value) return true;
+                                  const year = parseInt(value);
+                                  return year <= currentYear || 'Start year cannot be in the future'
+                                },
+                                reasonable: (value) => {
+                                  if (!value) return true;
+                                  const year = parseInt(value);
+                                  return year >= 1950 || 'Start year seems too old'
+                                }
                               }
-                            }
-                            
-                            return true;
-                          },
-                          notTooFuture: (value) => {
-                            if (!value) return true;
-                            const year = parseInt(value);
-                            return year <= currentYear + 10 || 'End year seems too far in the future'
-                          }
-                        }
-                      })}
-                    >
-                      <option value="">Year</option>
-                      {years.map(year => (
-                        <option key={year} value={year}>{year}</option>
-                      ))}
-                    </select>
-                  </div>
-                  {(errors.endMonth || errors.endYear) && (
-                    <span className="field-error">
-                      {errors.endMonth?.message || errors.endYear?.message}
-                    </span>
-                  )}
+                            })}
+                          >
+                            <option value="">Year</option>
+                            {years.map(year => (
+                              <option key={year} value={year}>{year}</option>
+                            ))}
+                          </select>
+                        </div>
+                        {(errors.startMonth || errors.startYear) && (
+                          <span className="field-error">
+                            {errors.startMonth?.message || errors.startYear?.message}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="edu-form-group">
+                        <label>End date (or expected)*</label>
+                        <div className="edu-date-inputs">
+                          <select
+                            className={errors.endMonth ? 'error' : ''}
+                            {...register('endMonth', {
+                              required: 'End month is required'
+                            })}
+                          >
+                            <option value="">Month</option>
+                            {months.map(month => (
+                              <option key={month} value={month}>{month}</option>
+                            ))}
+                          </select>
+                          <select
+                            className={errors.endYear ? 'error' : ''}
+                            {...register('endYear', {
+                              required: 'End year is required',
+                              validate: {
+                                afterStart: (value, formValues) => {
+                                  if (!value || !formValues.startYear) return true;
+                                  const endYearNum = parseInt(value);
+                                  const startYearNum = parseInt(formValues.startYear);
+                                  
+                                  if (endYearNum < startYearNum) {
+                                    return 'End year must be after start year';
+                                  }
+                                  
+                                  if (endYearNum === startYearNum && formValues.startMonth && formValues.endMonth) {
+                                    const startMonthIndex = months.indexOf(formValues.startMonth);
+                                    const endMonthIndex = months.indexOf(formValues.endMonth);
+                                    if (endMonthIndex < startMonthIndex) {
+                                      return 'End date must be after start date';
+                                    }
+                                  }
+                                  
+                                  return true;
+                                },
+                                notTooFuture: (value) => {
+                                  if (!value) return true;
+                                  const year = parseInt(value);
+                                  return year <= currentYear + 10 || 'End year seems too far in the future'
+                                }
+                              }
+                            })}
+                          >
+                            <option value="">Year</option>
+                            {years.map(year => (
+                              <option key={year} value={year}>{year}</option>
+                            ))}
+                          </select>
+                        </div>
+                        {(errors.endMonth || errors.endYear) && (
+                          <span className="field-error">
+                            {errors.endMonth?.message || errors.endYear?.message}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="edu-form-group">
+                      <label htmlFor="grade">Grade</label>
+                      <input
+                        type="text"
+                        id="grade"
+                        placeholder="Ex: 3.8 GPA, First Class, 85%"
+                        {...register('grade')}
+                      />
+                    </div>
+
+                    <div className="edu-form-group">
+                      <label htmlFor="activities">Activities and societies</label>
+                      <textarea
+                        id="activities"
+                        rows={3}
+                        placeholder="Ex: Student Council, Drama Club, Volunteer work..."
+                        {...register('activities')}
+                      />
+                    </div>
+
+                    <div className="edu-form-actions">
+                      <button 
+                        type="button" 
+                        className="cancel-btn"
+                        onClick={closeModal}
+                        disabled={isSubmitting}
+                      >
+                        Cancel
+                      </button>
+                      <button 
+                        type="submit" 
+                        className="edu-save-btn"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? 'Saving...' : 'Save'}
+                      </button>
+                    </div>
+                  </form>
                 </div>
-              </div>
-
-              {/* Grade Field - Optional, no validation as requested */}
-              <div className="edu-form-group">
-                <label htmlFor="grade">Grade</label>
-                <input
-                  type="text"
-                  id="grade"
-                  placeholder="Ex: 3.8 GPA, First Class, 85%"
-                  {...register('grade')}
-                />
-              </div>
-
-              {/* Activities Field - Optional, no validation as requested */}
-              <div className="edu-form-group">
-                <label htmlFor="activities">Activities and societies</label>
-                <textarea
-                  id="activities"
-                  rows={3}
-                  placeholder="Ex: Student Council, Drama Club, Volunteer work..."
-                  {...register('activities')}
-                />
-              </div>
-
-              <div className="edu-form-actions">
-                <button 
-                  type="submit" 
-                  className="edu-save-btn"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'Saving...' : 'Save'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+              </div>,
+              document.body
+            )
+          }
+        </>
       )}
     </>
   );

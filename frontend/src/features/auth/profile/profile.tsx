@@ -4,6 +4,7 @@ import Navbar from '../../auth/navbar/navbar';
 import './profile.css';
 import EducationSection from '../EducationSection/education';
 import ExperienceSection from '../ExperienceSection/experience';
+import SkillsSection from '../SkillsSection/skill';
 import Footer from '../Footer/footer';
 
 type Experience = {
@@ -384,18 +385,14 @@ export default function Profile() {
                 </div>
               )}
 
-              {/* Skills Section */}
-              <div className="profile-section">
-                <h3 className="section-title">
-                  <i className="fas fa-code"></i> Skills 
-                </h3>
-                <div className="skills-container">
-                  <span className="skill-tag">React</span>
-                  <span className="skill-tag">Node.js</span>
-                  <span className="skill-tag">JavaScript</span>
-                  <span className="skill-tag">MongoDB</span>
-                </div>
-              </div>
+             {/* Skills Section */}
+
+            <div className="profile-section">
+             <SkillsSection 
+              userId={userId} 
+              isOwnProfile={isOwnProfile}
+              />
+            </div>
 
               {/* Experience Section - Passing data as props */}
               <div className="profile-section">

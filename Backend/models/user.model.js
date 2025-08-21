@@ -34,7 +34,8 @@ const userSchema = new Schema({
   },
   bio: {
     type: String,
-    maxlength: [500, 'Bio must be under 500 characters']
+    maxlength: [500, 'Bio must be under 500 characters'],
+    default: ''
   },
   profilePicture: {
     url: {
@@ -45,12 +46,45 @@ const userSchema = new Schema({
       type: String,
       default: ''
     }
+  },
+
+  experienceIds: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Experience'
+  }],
+  educationIds: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Education'
+  }],
+  editProfileId: {
+    type: Schema.Types.ObjectId,
+    ref: 'EditProfile'
   }
-
-
 }, {
   timestamps: true
 });
+
+// Virtual for calculating age
+userSchema.virtual('age').get(function() {
+  if (!this.dateOfBirth) return null;
+  const today = new Date();
+  const birthDate = new Date(this.dateOfBirth);
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  
+  return age;
+});
+
+// Method to get profile data (excluding sensitive info)
+userSchema.methods.getProfileData = function() {
+  const userObject = this.toObject();
+  delete userObject.password;
+  return userObject;
+};
 
 userSchema.index({ username: 1 });
 userSchema.index({ email: 1 });

@@ -1,7 +1,7 @@
-// controllers/education.controller.js
+// backend/controllers/education.controller.js
 import mongoose from 'mongoose';
 import Education from '../models/education.model.js';
-
+import User from '../models/user.model.js'; 
 // Get all education records for a specific user
 export async function getUserEducation(req, res) {
     try {
@@ -38,7 +38,7 @@ export async function getUserEducation(req, res) {
 // Create new education record
 export async function createEducation(req, res) {
     try {
-        const userId = req.user.id; // Your token uses 'id' field
+        const userId = req.user.id;
         const educationData = {
             ...req.body,
             userId
@@ -49,6 +49,11 @@ export async function createEducation(req, res) {
 
         const education = new Education(educationData);
         await education.save();
+
+        // adding education id in user model
+        await User.findByIdAndUpdate(userId, {
+            $addToSet: { educationIds: education._id }
+        });
 
         res.status(201).json({
             message: "Education created successfully",
@@ -95,7 +100,7 @@ export async function createEducation(req, res) {
 export async function updateEducation(req, res) {
     try {
         const { educationId } = req.params;
-        const userId = req.user.id; // Your token uses 'id' field
+        const userId = req.user.id;
 
         console.log('Updating education:', educationId, 'for user:', userId);
 
@@ -173,7 +178,7 @@ export async function updateEducation(req, res) {
 export async function deleteEducation(req, res) {
     try {
         const { educationId } = req.params;
-        const userId = req.user.id; // Your token uses 'id' field
+        const userId = req.user.id;
 
         console.log('Deleting education:', educationId, 'for user:', userId);
 
@@ -191,6 +196,11 @@ export async function deleteEducation(req, res) {
 
         // Delete the education record
         await Education.findByIdAndDelete(educationId);
+
+        //removing education id from user model
+        await User.findByIdAndUpdate(userId, {
+            $pull: { educationIds: educationId }
+        });
 
         res.status(200).json({
             message: "Education deleted successfully"
@@ -216,7 +226,7 @@ export async function deleteEducation(req, res) {
 export async function getEducationById(req, res) {
     try {
         const { educationId } = req.params;
-        const userId = req.user.id; // Your token uses 'id' field
+        const userId = req.user.id;
 
         console.log('Getting education:', educationId, 'for user:', userId);
 

@@ -6,6 +6,49 @@ import EducationSection from '../EducationSection/education';
 import ExperienceSection from '../ExperienceSection/experience';
 import Footer from '../Footer/footer';
 
+type Experience = {
+  id?: string;
+  _id?: string;
+  title: string;
+  company: string;
+  employmentType: string;
+  startMonth: string;
+  startYear: string;
+  endMonth: string;
+  endYear: string;
+  location: string;
+  locationType: string;
+  description: string;
+  isCurrentRole: boolean;
+};
+
+type Education = {
+  id?: string;
+  _id?: string;
+  school: string;
+  degree: string;
+  fieldOfStudy: string;
+  startDate: {
+    month: string;
+    year: string;
+  };
+  endDate: {
+    month: string;
+    year: string;
+  };
+  grade?: string;
+  activities?: string;
+};
+
+type EditProfile = {
+  _id: string;
+  fullName: string;
+  dateOfBirth: string;
+  gender: string;
+  employmentType: string;
+  expectedSalary: string;
+};
+
 type User = {
   _id: string;
   username: string;
@@ -17,10 +60,15 @@ type User = {
     url?: string;
     public_id?: string;
   };
+  experiences?: Experience[];
+  educations?: Education[];
+  editProfile?: EditProfile;
 }
 
 export default function Profile() {
   const [user, setUser] = useState<User | null>(null);
+  const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [educations, setEducations] = useState<Education[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -51,9 +99,10 @@ export default function Profile() {
     const getUser = async () => {
       try {
         const token = localStorage.getItem('token');
-        console.log(' Fetching profile for userId:', userId);
-        console.log(' Using token:', token ? 'Token exists' : 'No token');
+        console.log('Fetching profile for userId:', userId);
+        console.log('Using token:', token ? 'Token exists' : 'No token');
         
+        // Single API call to get all data
         const response = await fetch(`http://localhost:3000/api/user/profile/${userId}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -61,19 +110,23 @@ export default function Profile() {
           }
         });
 
-        console.log(' Response status:', response.status);
+        console.log('Response status:', response.status);
         
         if (response.ok) {
           const data = await response.json();
-          console.log(' Profile data received:', data);
+          console.log('Profile data received:', data);
           setUser(data.user);
+          
+          // Set experiences and educations from populated data
+          setExperiences(data.user.experiences || []);
+          setEducations(data.user.educations || []);
         } else {
           const errorData = await response.text();
-          console.error(' Response error:', errorData);
+          console.error('Response error:', errorData);
           setError(`Failed to load user profile: ${response.status}`);
         }
       } catch (error) {
-        console.error(' Network error:', error);
+        console.error('Network error:', error);
         setError('Network error occurred');
       }
       setLoading(false);
@@ -175,6 +228,17 @@ export default function Profile() {
     }
   };
 
+  // Helper function to format date
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'Not specified';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  };
+
   const isOwnProfile = currentUserId === userId;
 
   if (loading) {
@@ -211,13 +275,25 @@ export default function Profile() {
       <div className="profile-wrapper">
         <div className="profile-container">
           
-          {/* Back Button */}
-          <button 
-            onClick={() => navigate('/home')}
-            className="back-button"
-          >
-            <i className="fas fa-arrow-left"></i> Back to Home
-          </button>
+          {/* Header with Back and Edit buttons */}
+          <div className="profile-header-buttons">
+            <button 
+              onClick={() => navigate('/home')}
+              className="back-button"
+            >
+              <i className="fas fa-arrow-left"></i> Back to Home
+            </button>
+            
+            {/* Edit Profile Button - only show for own profile */}
+            {isOwnProfile && (
+              <button 
+                onClick={() => navigate('/edit-profile')}
+                className="edit-profile-button"
+              >
+                <i className="fas fa-edit"></i> Edit Profile
+              </button>
+            )}
+          </div>
 
           {/* Main Profile Layout  */}
           <div className="profile-layout">
@@ -284,7 +360,9 @@ export default function Profile() {
 
                 {/* Basic Info - Left Side */}
                 <div className="profile-basic-info">
-                  <h1 className="profile-name">{user.username}</h1>
+                  <h1 className="profile-name">
+                    {user.editProfile?.fullName || user.username}
+                  </h1>
                   
                   {user.address && (
                     <p className="profile-location">
@@ -292,15 +370,21 @@ export default function Profile() {
                       {user.address}
                     </p>
                   )}
-                  
-                  {user.bio && (
-                    <p className="profile-description">{user.bio}</p>
-                  )}
                 </div>
 
               </div>
 
-              {/* Skills  Section */}
+              {/* Bio Section - Outside header */}
+              {user.bio && (
+                <div className="profile-section bio-section">
+                  <h3 className="section-title">
+                    <i className="fas fa-user"></i> Bio
+                  </h3>
+                  <p className="bio-text">{user.bio}</p>
+                </div>
+              )}
+
+              {/* Skills Section */}
               <div className="profile-section">
                 <h3 className="section-title">
                   <i className="fas fa-code"></i> Skills 
@@ -313,9 +397,13 @@ export default function Profile() {
                 </div>
               </div>
 
-              {/* Experience Section */}
+              {/* Experience Section - Passing data as props */}
               <div className="profile-section">
-                <ExperienceSection userId={userId} />
+                <ExperienceSection 
+                  userId={userId} 
+                  experiences={experiences}
+                  setExperiences={setExperiences}
+                />
               </div>
 
             </div>
@@ -323,29 +411,72 @@ export default function Profile() {
             {/* Right Side - Sidebar */}
             <div className="profile-sidebar">
               
-              {/* Quick Stats */}
+              {/* Personal Information (replaces Quick Stats) */}
               <div className="sidebar-card">
                 <h3 className="card-title">
-                  <i className="fas fa-chart-line"></i> Quick Stats
+                  <i className="fas fa-user"></i> Personal Information
                 </h3>
-                <div className="stat-item">
-                  <span className="stat-label">
-                    <i className="fas fa-dollar-sign"></i> Hourly Rate
-                  </span>
-                  <span className="stat-value">$45/hr</span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-label">
-                    <i className="fas fa-clock"></i> Experience
-                  </span>
-                  <span className="stat-value">2+ years</span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-label">
-                    <i className="fas fa-calendar-check"></i> Availability
-                  </span>
-                  <span className="stat-value">Full-Time</span>
-                </div>
+                
+                {user.editProfile?.fullName && (
+                  <div className="personal-info-item">
+                    <span className="info-label">
+                      <i className="fas fa-id-card"></i> Full Name
+                    </span>
+                    <span className="info-value">{user.editProfile.fullName}</span>
+                  </div>
+                )}
+                
+                {user.editProfile?.dateOfBirth && (
+                  <div className="personal-info-item">
+                    <span className="info-label">
+                      <i className="fas fa-birthday-cake"></i> Date of Birth
+                    </span>
+                    <span className="info-value">{formatDate(user.editProfile.dateOfBirth)}</span>
+                  </div>
+                )}
+                
+                {user.editProfile?.gender && (
+                  <div className="personal-info-item">
+                    <span className="info-label">
+                      <i className="fas fa-venus-mars"></i> Gender
+                    </span>
+                    <span className="info-value">{user.editProfile.gender}</span>
+                  </div>
+                )}
+                
+                {user.editProfile?.employmentType && (
+                  <div className="personal-info-item">
+                    <span className="info-label">
+                      <i className="fas fa-briefcase"></i> Employment Type
+                    </span>
+                    <span className="info-value">{user.editProfile.employmentType}</span>
+                  </div>
+                )}
+                
+                {user.editProfile?.expectedSalary && (
+                  <div className="personal-info-item">
+                    <span className="info-label">
+                      <i className="fas fa-dollar-sign"></i> Expected Salary
+                    </span>
+                    <span className="info-value">{user.editProfile.expectedSalary}</span>
+                  </div>
+                )}
+                
+                {/* Show message if no edit profile data */}
+                {!user.editProfile && (
+                  <div className="no-info-message">
+                    <i className="fas fa-info-circle"></i>
+                    <span>Personal information not available</span>
+                    {isOwnProfile && (
+                      <button 
+                        onClick={() => navigate('/edit-profile')}
+                        className="add-info-btn"
+                      >
+                        Add Information
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Contact Information */}
@@ -365,8 +496,12 @@ export default function Profile() {
                 )}
               </div>
 
-              {/* Education Section */}
-              <EducationSection userId={userId} />
+              {/* Education Section - Passing data as props */}
+              <EducationSection 
+                userId={userId} 
+                educations={educations}
+                setEducations={setEducations}
+              />
 
             </div>
 

@@ -27,6 +27,7 @@
   color: #2d3748;
   margin-bottom: 40px;
   background: rgba(255, 255, 255, 0.8);
+  background-image: url(https://png.pngtree.com/background/20250523/original/pngtree-buildings-connected-by-glowing-blue-data-lines-the-background-is-a-picture-image_16533463.jpg);
   backdrop-filter: blur(10px);
   padding: 80px 30px 60px;
   border-radius: 25px;
@@ -129,7 +130,7 @@
   font-size: 3.2rem;
   margin-bottom: 20px;
   font-weight: 700;
-  background: linear-gradient(135deg, #259bef, #97d0f8);
+  background-color: #259bef;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -141,7 +142,7 @@
 .hero-section p {
   font-size: 1.4rem;
   margin-bottom: 40px;
-  color: #4a5568;
+  color: #0a5781;
   opacity: 0.9;
   max-width: 600px;
   margin-left: auto;

@@ -7,12 +7,14 @@ import authRoutes from './routes/auth.route.js';
 import userRoutes from './routes/user.route.js';
 import experienceRoutes from './routes/experience.route.js';
 import educationRoutes from './routes/education.route.js';
+import EditProfile from './models/editProfile.model.js';
 import { authMiddleware } from './middleware/auth.middleware.js';
 
 // Load environment variables
 dotenv.config();
 
 const app = express();
+
 
 // CORS Configuration
 app.use(cors({
@@ -29,7 +31,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/user/experience', experienceRoutes);
 app.use('/api/user/education', educationRoutes); // Add this line
-
+// Make sure this line is added:
+app.use('/api/user', EditProfile);
 // Test auth route to verify JWT token is working
 app.get('/api/user/test-auth', authMiddleware, (req, res) => {
     res.json({ 
@@ -89,9 +92,9 @@ app.get('/api/debug/users', async (req, res) => {
         const totalUsers = await User.countDocuments();
         const allUsers = await User.find({}, '-password').sort({ createdAt: -1 });
                 
-        console.log('🔍 Database Debug Info:');
-        console.log('📊 Total users in database:', totalUsers);
-        console.log('👥 All users:', allUsers.map(u => ({
+        console.log(' Database Debug Info:');
+        console.log(' Total users in database:', totalUsers);
+        console.log(' All users:', allUsers.map(u => ({
             id: u._id,
             username: u.username,
             email: u.email,

@@ -1,6 +1,7 @@
 // backend/controllers/experience.controller.js
 import mongoose from 'mongoose';
 import Experience from '../models/experience.model.js';
+import User from '../models/user.model.js'; 
 
 // Get all experiences for a specific user
 export async function getUserExperiences(req, res) {
@@ -20,10 +21,10 @@ export async function getUserExperiences(req, res) {
                 title: exp.title,
                 company: exp.company,
                 employmentType: exp.employmentType,
-                startMonth: exp.startMonth,       // Change gareko
-                startYear: exp.startYear,         // Change gareko
-                endMonth: exp.endMonth || '',     // Change gareko
-                endYear: exp.endYear || '',       // Change gareko
+                startMonth: exp.startMonth,
+                startYear: exp.startYear,
+                endMonth: exp.endMonth || '',
+                endYear: exp.endYear || '',
                 location: exp.location,
                 locationType: exp.locationType,
                 description: exp.description || '',
@@ -42,7 +43,7 @@ export async function getUserExperiences(req, res) {
 // Create new experience
 export async function createExperience(req, res) {
     try {
-        const userId = req.user.id; // Fixed: using id instead of userId
+        const userId = req.user.id;
         const experienceData = {
             ...req.body,
             userId
@@ -53,6 +54,11 @@ export async function createExperience(req, res) {
 
         const experience = new Experience(experienceData);
         await experience.save();
+
+        // Adding experience id in user model
+        await User.findByIdAndUpdate(userId, {
+            $addToSet: { experienceIds: experience._id }
+        });
 
         res.status(201).json({
             message: "Experience created successfully",
@@ -81,7 +87,7 @@ export async function createExperience(req, res) {
 export async function updateExperience(req, res) {
     try {
         const { experienceId } = req.params;
-        const userId = req.user.id; // Fixed: using id instead of userId
+        const userId = req.user.id;
 
         console.log('Updating experience:', experienceId, 'for user:', userId);
 
@@ -141,7 +147,7 @@ export async function updateExperience(req, res) {
 export async function deleteExperience(req, res) {
     try {
         const { experienceId } = req.params;
-        const userId = req.user.id; // Fixed: using id instead of userId
+        const userId = req.user.id;
 
         console.log('Deleting experience:', experienceId, 'for user:', userId);
 
@@ -159,6 +165,11 @@ export async function deleteExperience(req, res) {
 
         // Delete the experience
         await Experience.findByIdAndDelete(experienceId);
+
+        // removing the experience id from user model
+        await User.findByIdAndUpdate(userId, {
+            $pull: { experienceIds: experienceId }
+        });
 
         res.status(200).json({
             message: "Experience deleted successfully"
@@ -184,7 +195,7 @@ export async function deleteExperience(req, res) {
 export async function getExperienceById(req, res) {
     try {
         const { experienceId } = req.params;
-        const userId = req.user.id; // Fixed: using id instead of userId
+        const userId = req.user.id;
 
         console.log('Getting experience:', experienceId, 'for user:', userId);
 

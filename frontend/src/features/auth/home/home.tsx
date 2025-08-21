@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './home.css';
 import Navbar from '../../auth/navbar/navbar';
 import Footer from '../Footer/footer';
+import Logo from '../logo/logo';
 
 
 type User = {
@@ -117,7 +118,6 @@ export default function Home() {
           <section className="hero-section">
             <h1>Welcome , {username} </h1>
             <p>Ready to discover amazing opportunities and connect with wonderful people? Let's make today productive!</p>
-
             <div className="search-container">
               <input
                 type="text"

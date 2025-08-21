@@ -4,7 +4,8 @@ import { useForm, Controller } from 'react-hook-form';
 import './experience.css';
 
 type Experience = {
-  id: string;
+  id?: string;
+  _id?: string;
   title: string;
   company: string;
   employmentType: string;
@@ -20,12 +21,14 @@ type Experience = {
 
 interface ExperienceSectionProps {
   userId?: string;
+  experiences?: Experience[];
+  setExperiences?: (experiences: Experience[]) => void;
 }
 
-type FormData = Omit<Experience, 'id'>;
+type FormData = Omit<Experience, 'id' | '_id'>;
 
-export default function ExperienceSection({ userId }: ExperienceSectionProps) {
-  const [experiences, setExperiences] = useState<Experience[]>([]);
+export default function ExperienceSection({ userId, experiences: propExperiences, setExperiences }: ExperienceSectionProps) {
+  const [experiences, setLocalExperiences] = useState<Experience[]>(propExperiences || []);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
   
@@ -103,6 +106,11 @@ export default function ExperienceSection({ userId }: ExperienceSectionProps) {
     return true;
   };
 
+  // Get unique ID from either _id or id field
+  const getExperienceId = (experience: Experience) => {
+    return experience._id || experience.id;
+  };
+
   // Check if current user is viewing their own profile
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -117,31 +125,12 @@ export default function ExperienceSection({ userId }: ExperienceSectionProps) {
     }
   }, [userId]);
 
-  // Fetch experiences
+  // FIXED: Use prop experiences instead of fetching (NO API CALL)
   useEffect(() => {
-    const fetchExperiences = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:3000/api/user/experience/${userId}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setExperiences(data.experiences || []);
-        }
-      } catch (error) {
-        console.error('Error fetching experiences:', error);
-      }
-    };
-
-    if (userId) {
-      fetchExperiences();
+    if (propExperiences) {
+      setLocalExperiences(propExperiences);
     }
-  }, [userId]);
+  }, [propExperiences]);
 
   // Validate dates whenever date fields change
   useEffect(() => {
@@ -199,6 +188,13 @@ export default function ExperienceSection({ userId }: ExperienceSectionProps) {
     document.body.classList.remove('modal-open');
   };
 
+  const updateExperienceState = (newExperiences: Experience[]) => {
+    setLocalExperiences(newExperiences);
+    if (setExperiences) {
+      setExperiences(newExperiences);
+    }
+  };
+
   const onSubmit = async (data: FormData) => {
     if (!isOwnProfile) {
       alert('You can only edit your own profile!');
@@ -208,7 +204,7 @@ export default function ExperienceSection({ userId }: ExperienceSectionProps) {
     try {
       const token = localStorage.getItem('token');
       const url = editingExperience 
-        ? `http://localhost:3000/api/user/experience/${editingExperience.id}`
+        ? `http://localhost:3000/api/user/experience/${getExperienceId(editingExperience)}`
         : `http://localhost:3000/api/user/experience`;
       
       const method = editingExperience ? 'PUT' : 'POST';
@@ -226,11 +222,13 @@ export default function ExperienceSection({ userId }: ExperienceSectionProps) {
         const responseData = await response.json();
         
         if (editingExperience) {
-          setExperiences(prev => prev.map(exp => 
-            exp.id === editingExperience.id ? responseData.experience : exp
-          ));
+          const updatedExperiences = experiences.map(exp => 
+            getExperienceId(exp) === getExperienceId(editingExperience) ? responseData.experience : exp
+          );
+          updateExperienceState(updatedExperiences);
         } else {
-          setExperiences(prev => [...prev, responseData.experience]);
+          const newExperiences = [...experiences, responseData.experience];
+          updateExperienceState(newExperiences);
         }
         
         closeModal();
@@ -262,7 +260,8 @@ export default function ExperienceSection({ userId }: ExperienceSectionProps) {
         });
 
         if (response.ok) {
-          setExperiences(prev => prev.filter(exp => exp.id !== id));
+          const filteredExperiences = experiences.filter(exp => getExperienceId(exp) !== id);
+          updateExperienceState(filteredExperiences);
         } else {
           const errorData = await response.json();
           alert(errorData.message || 'Failed to delete experience');
@@ -302,8 +301,8 @@ export default function ExperienceSection({ userId }: ExperienceSectionProps) {
               : "No experience information available."}
           </p>
         ) : (
-          experiences.map(experience => (
-            <div key={experience.id} className="experience-item">
+          experiences.map((experience, index) => (
+            <div key={getExperienceId(experience) || index} className="experience-item">
               <div className="experience-header">
                 <div className="experience-main-info">
                   <h4 className="experience-title">{experience.title}</h4>
@@ -319,7 +318,7 @@ export default function ExperienceSection({ userId }: ExperienceSectionProps) {
                     <button className="edit-btn" onClick={() => openModal(experience)}>
                       <i className="fas fa-pen"></i>
                     </button>
-                    <button className="delete-btn" onClick={() => deleteExperience(experience.id)}>
+                    <button className="delete-btn" onClick={() => deleteExperience(getExperienceId(experience)!)}>
                       <i className="fas fa-trash"></i>
                     </button>
                   </div>

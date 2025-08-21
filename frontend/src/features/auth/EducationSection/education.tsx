@@ -4,7 +4,8 @@ import { useForm } from 'react-hook-form';
 import './education.css';
 
 type Education = {
-  id: string;
+  id?: string;
+  _id?: string;
   school: string;
   degree: string;
   fieldOfStudy: string;
@@ -34,10 +35,12 @@ type EducationFormData = {
 
 interface EducationSectionProps {
   userId?: string;
+  educations?: Education[];
+  setEducations?: (educations: Education[]) => void;
 }
 
-export default function EducationSection({ userId }: EducationSectionProps) {
-  const [educationList, setEducationList] = useState<Education[]>([]);
+export default function EducationSection({ userId, educations: propEducations, setEducations }: EducationSectionProps) {
+  const [educationList, setEducationList] = useState<Education[]>(propEducations || []);
   const [showModal, setShowModal] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
@@ -90,31 +93,23 @@ export default function EducationSection({ userId }: EducationSectionProps) {
     }
   }, [userId]);
 
-  // Fetch education data
+  // FIXED: Use prop educations instead of fetching (NO API CALL)
   useEffect(() => {
-    const fetchEducation = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:3000/api/user/education/${userId}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setEducationList(data.education || []);
-        }
-      } catch (error) {
-        console.error('Error fetching education:', error);
-      }
-    };
-
-    if (userId) {
-      fetchEducation();
+    if (propEducations) {
+      setEducationList(propEducations);
     }
-  }, [userId]);
+  }, [propEducations]);
+
+  const updateEducationState = (newEducations: Education[]) => {
+    setEducationList(newEducations);
+    if (setEducations) {
+      setEducations(newEducations);
+    }
+  };
+
+  const getEducationId = (education: Education) => {
+    return education._id || education.id;
+  };
 
   const openModal = (education?: Education) => {
     if (!isOwnProfile) {
@@ -152,7 +147,7 @@ export default function EducationSection({ userId }: EducationSectionProps) {
     try {
       const token = localStorage.getItem('token');
       const url = editingEducation 
-        ? `http://localhost:3000/api/user/education/${editingEducation.id}`
+        ? `http://localhost:3000/api/user/education/${getEducationId(editingEducation)}`
         : `http://localhost:3000/api/user/education`;
       
       const method = editingEducation ? 'PUT' : 'POST';
@@ -187,12 +182,14 @@ export default function EducationSection({ userId }: EducationSectionProps) {
         
         if (editingEducation) {
           // Update existing education
-          setEducationList(prev => prev.map(edu => 
-            edu.id === editingEducation.id ? responseData.education : edu
-          ));
+          const updatedEducations = educationList.map(edu => 
+            getEducationId(edu) === getEducationId(editingEducation) ? responseData.education : edu
+          );
+          updateEducationState(updatedEducations);
         } else {
           // Add new education
-          setEducationList(prev => [...prev, responseData.education]);
+          const newEducations = [...educationList, responseData.education];
+          updateEducationState(newEducations);
         }
         
         reset();
@@ -226,7 +223,8 @@ export default function EducationSection({ userId }: EducationSectionProps) {
         });
 
         if (response.ok) {
-          setEducationList(prev => prev.filter(edu => edu.id !== id));
+          const filteredEducations = educationList.filter(edu => getEducationId(edu) !== id);
+          updateEducationState(filteredEducations);
         } else {
           const errorData = await response.json();
           alert(errorData.message || 'Failed to delete education');
@@ -265,8 +263,8 @@ export default function EducationSection({ userId }: EducationSectionProps) {
         
         {educationList.length > 0 ? (
           <div className="edu-list">
-            {educationList.map((edu) => (
-              <div key={edu.id} className="edu-item">
+            {educationList.map((edu, index) => (
+              <div key={getEducationId(edu) || index} className="edu-item">
                 <div className="edu-header">
                   <h4 className="edu-school">{edu.school}</h4>
                   {/* Only show delete and edit buttons if user is viewing their own profile */}
@@ -277,11 +275,11 @@ export default function EducationSection({ userId }: EducationSectionProps) {
                         onClick={() => openModal(edu)}
                         title="Edit"
                       >
-                        <i className="fas fa-pen"></i>
+                         <i className="fas fa-pen"></i>
                       </button>
                       <button 
                         className="edu-delete-btn"
-                        onClick={() => handleDeleteEducation(edu.id)}
+                        onClick={() => handleDeleteEducation(getEducationId(edu)!)}
                         title="Delete"
                       >
                         <i className="fas fa-trash"></i>
@@ -293,9 +291,9 @@ export default function EducationSection({ userId }: EducationSectionProps) {
                 {edu.degree && <p className="edu-degree">{edu.degree}</p>}
                 {edu.fieldOfStudy && <p className="edu-field">{edu.fieldOfStudy}</p>}
                 
-                {(edu.startDate.month || edu.startDate.year || edu.endDate.month || edu.endDate.year) && (
+                {(edu.startDate?.month || edu.startDate?.year || edu.endDate?.month || edu.endDate?.year) && (
                   <p className="edu-duration">
-                    {edu.startDate.month} {edu.startDate.year} - {edu.endDate.month} {edu.endDate.year}
+                    {edu.startDate?.month} {edu.startDate?.year} - {edu.endDate?.month} {edu.endDate?.year}
                   </p>
                 )}
                 

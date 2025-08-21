@@ -1,3 +1,4 @@
+/* Global reset */
 * {
   margin: 0;
   padding: 0;
@@ -8,19 +9,27 @@
 html, body, #root {
   height: 100%;
   width: 100%;
-  
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
+/* Force register wrapper to full width - remove white corners */
 .register-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: linear-gradient( rgb(164, 226, 248), white);
+  background: linear-gradient(rgb(164, 226, 248), white);
+  /* Remove white corners */
+  width: 100vw !important;
+  margin-left: calc(-50vw + 50%) !important;
+  margin-right: calc(-50vw + 50%) !important;
+  position: relative;
 }
 
 .register-card {
   width: 450px;
+  max-width: 90vw;
   padding: 25px;
   border-radius: 18px;
   background-color: #ffffffdd;
@@ -28,6 +37,7 @@ html, body, #root {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  backdrop-filter: blur(10px);
 }
 
 .register-title {
@@ -35,6 +45,7 @@ html, body, #root {
   color: #48c3fd;
   font-size: 2rem;
   margin-bottom: 1rem;
+  font-weight: 600;
 }
 
 .register-field {
@@ -45,15 +56,26 @@ html, body, #root {
 .register-field label {
   font-weight: 600;
   margin-bottom: 4px;
+  color: #333;
 }
 
-.register-field input,
-.register-field select,
+.register-field input, 
+.register-field select, 
 .register-field textarea {
   padding: 10px;
   border-radius: 10px;
   border: 1px solid #b3e5fc;
   background: #f8f9fa;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.register-field input:focus,
+.register-field textarea:focus {
+  outline: none;
+  border-color: #48c3fd;
+  box-shadow: 0 0 0 3px rgba(72, 195, 253, 0.1);
+  background: white;
 }
 
 .register-btn {
@@ -64,11 +86,21 @@ html, body, #root {
   font-weight: bold;
   border: none;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
+  font-size: 16px;
 }
 
-.register-btn:hover {
+.register-btn:hover:not(:disabled) {
   background-color: #56b6ee;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(86, 182, 238, 0.3);
+}
+
+.register-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .register-error {
@@ -79,16 +111,29 @@ html, body, #root {
 .register-login-link {
   text-align: center;
   font-size: 0.9rem;
+  color: #666;
+}
+
+.register-login-link a {
+  color: #48c3fd;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.register-login-link a:hover {
+  color: #2196f3;
+  text-decoration: underline;
 }
 
 /* Error input styling */
-.register-field input.error,
+.register-field input.error, 
 .register-field textarea.error {
   border: 2px solid #e74c3c;
   background-color: rgba(231, 76, 60, 0.1);
 }
 
-.register-field input.error:focus,
+.register-field input.error:focus, 
 .register-field textarea.error:focus {
   border-color: #e74c3c;
   box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
@@ -101,6 +146,18 @@ html, body, #root {
   font-size: 0.85rem;
   margin-top: 5px;
   font-weight: 500;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Character count styling */
@@ -121,4 +178,63 @@ html, body, #root {
   margin-top: 15px;
   border-left: 4px solid #e74c3c;
   font-weight: 500;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .register-card {
+    width: 95%;
+    padding: 20px;
+    margin: 10px;
+  }
+  
+  .register-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .register-field {
+    gap: 12px;
+  }
+  
+  .register-field input,
+  .register-field textarea {
+    padding: 8px;
+    font-size: 14px;
+  }
+  
+  .register-btn {
+    padding: 10px;
+    font-size: 14px;
+  }
+}
+
+@media (max-height: 700px) {
+  .register-wrapper {
+    padding: 20px 0;
+    align-items: flex-start;
+    justify-content: center;
+    overflow-y: auto;
+  }
+  
+  .register-card {
+    margin: 20px auto;
+  }
+}
+
+/* Ensure form scrolls properly on very small screens */
+@media (max-height: 600px) {
+  .register-wrapper {
+    height: auto;
+    min-height: 100vh;
+    padding: 10px 0;
+  }
+  
+  .register-card {
+    margin: 10px auto;
+  }
+  
+  .register-field {
+    gap: 8px;
+  }
 }

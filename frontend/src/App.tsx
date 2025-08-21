@@ -11,6 +11,7 @@ import RoleGuard from './shared/guards/roleGuard'
 import Profile from './features/auth/profile/profile'
 import axiosInstance from './shared/config/axiosinstance'
 import ContactUs from './features/auth/Contact/contact'
+import EditProfile from './features/auth/EditProfile/edit'
 
 function App() {
 
@@ -48,6 +49,9 @@ function App() {
       <Route path="/profile/:userId" element={<Profile />} />
 
       <Route path='/notfound' element={<NotFound/>}/>
+      
+      <Route path='//edit-profile' element={<EditProfile/>}/>
+
       <Route path='*' element={<NotFound/>}/>
     </Routes>
     </div>

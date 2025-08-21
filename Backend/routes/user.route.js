@@ -4,6 +4,7 @@ import {
     getUserList,
     searchUsers,
     getUserProfile,
+    fixUserSkills,
     // Skills functions
     addUserSkill,
     updateUserSkill,
@@ -21,9 +22,12 @@ import { upload } from "../middleware/image-uploader.middleware.js";
 const router = express.Router();
 
 // ===== PUBLIC ROUTES =====
-router.get('/list', getUserList);                    // Skills included via populate
-router.get('/search', searchUsers);                  // Skills included via populate  
-router.get('/profile/:id', getUserProfile);          // Skills included via populate
+router.get('/list', getUserList);
+router.get('/search', searchUsers);
+router.get('/profile/:id', getUserProfile);
+
+// Fix skills endpoint (temporary)
+router.get('/fix-skills/:userId', fixUserSkills);
 
 // ===== PROTECTED ROUTES =====
 
